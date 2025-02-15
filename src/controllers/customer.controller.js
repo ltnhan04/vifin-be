@@ -1,9 +1,9 @@
-const AuthService = require("../services/auth.service");
+const CustomerService = require("../services/customer.service");
 const ResponseHandler = require("../utils/response.handler");
-const signUp = async (req, res, next) => {
+const createCustomer = async (req, res, next) => {
   try {
     const customerId = req.customer.user_id;
-    const newCustomer = await AuthService.createNewCustomer({
+    const newCustomer = await CustomerService.createNewCustomer({
       ...req.body,
       uid: customerId,
     });
@@ -18,10 +18,10 @@ const signUp = async (req, res, next) => {
     next(error);
   }
 };
-const signIn = async (req, res, next) => {
+const getCustomers = async (req, res, next) => {
   try {
     const customerId = req.customer.user_id;
-    const getCustomerInfo = await AuthService.getCustomer(customerId);
+    const getCustomerInfo = await CustomerService.getCustomer(customerId);
     return ResponseHandler.sendSuccess(
       res,
       getCustomerInfo,
@@ -33,4 +33,4 @@ const signIn = async (req, res, next) => {
   }
 };
 
-module.exports = { signUp, signIn };
+module.exports = { createCustomer, getCustomers };

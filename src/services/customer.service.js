@@ -1,5 +1,5 @@
 const { db } = require("../configs/firebase.config");
-class AuthService {
+class CustomerService {
   static createNewCustomer = async ({
     avatar,
     full_name,
@@ -23,4 +23,5 @@ class AuthService {
     return { ...docSnap.data(), _id: uid };
   };
 }
-module.exports = AuthService;
+
+module.exports = CustomerService;
