@@ -5,10 +5,11 @@ const {
   deletedCategory,
   getCategories,
 } = require("../controllers/category.controller");
+const { authenticateToken } = require("../middlewares/auth.middleware");
 
-router.get("/", getCategories);
+router.get("/", authenticateToken, getCategories);
 router.post("/", addCategory);
-router.put("/:id", updatedCategory);
-router.delete("/:id", deletedCategory);
+router.put("/:id", authenticateToken, updatedCategory);
+router.delete("/:id", authenticateToken, deletedCategory);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const BudgetService = require("../services/budget.service");
 const ResponseHandler = require("../utils/response.handler");
+const ErrorHandler = require("../middlewares/error.handler");
 
 const createNewBudget = async (req, res, next) => {
   try {
@@ -15,10 +16,19 @@ const createNewBudget = async (req, res, next) => {
   }
 };
 
-const updatedBudget = async (req, res, next) => {
+const updateBudget = async (req, res, next) => {
   try {
     const budgetId = req.params.id;
-    const budget = await BudgetService.updatedBudget(budgetId, req.body);
+    let budget = await BudgetService.getBudgetById(budgetId);
+    if (!budget) {
+      throw new ErrorHandler("Budget Not Found", 404);
+    }
+    await BudgetService.updateBudget(budgetId, req.body);
+    budget = await BudgetService.getBudgetById(budgetId);
+    await BudgetService.checkBudgetCompletion(budget);
+    if (budget.is_repeated) {
+      await BudgetService.handleRepeatBudget(budget);
+    }
     return ResponseHandler.sendSuccess(
       res,
       budget,
@@ -33,7 +43,7 @@ const updatedBudget = async (req, res, next) => {
 const deletedBudget = async (req, res, next) => {
   try {
     const budgetId = req.params.id;
-    await BudgetService.deletedBudget(budgetId);
+    await BudgetService.deleteBudget(budgetId);
     return ResponseHandler.sendSuccess(
       res,
       "",
@@ -63,6 +73,9 @@ const getBudget = async (req, res, next) => {
   try {
     const budgetId = req.params.id;
     const budget = await BudgetService.getBudgetById(budgetId);
+    if (budget === -1) {
+      throw new ErrorHandler("Budget Not Found", 404);
+    }
     return ResponseHandler.sendSuccess(
       res,
       budget,
@@ -76,7 +89,7 @@ const getBudget = async (req, res, next) => {
 
 module.exports = {
   createNewBudget,
-  updatedBudget,
+  updateBudget,
   getBudget,
   getBudgets,
   deletedBudget,

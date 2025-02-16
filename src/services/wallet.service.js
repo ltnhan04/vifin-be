@@ -1,4 +1,5 @@
 const { db } = require("../configs/firebase.config");
+const BudgetService = require("../services/budget.service");
 
 class WalletService {
   static getWallets = async () => {
@@ -35,7 +36,15 @@ class WalletService {
     return { ...updateData, _id: id };
   };
   static deleteWallet = async (id) => {
-    return await db.collection("wallets").doc(id).delete();
+    await db.collection("wallets").doc(id).delete();
+    const budget = await db
+      .collection("budgets")
+      .where("wallet_id", "==", id)
+      .get();
+    budget.forEach(
+      async (docSnap) => await db.collection("budgets").doc(docSnap.id).delete()
+    );
+    return;
   };
 }
 

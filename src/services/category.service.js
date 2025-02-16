@@ -1,9 +1,13 @@
 const { db } = require("../configs/firebase.config");
+const BudgetService = require("../services/budget.service");
 
 class CategoryService {
-  static getCategories = async () => {
+  static getCategories = async (customerId) => {
     const categoryData = [];
-    const querySnap = await db.collection("categories").get();
+    const querySnap = await db
+      .collection("categories")
+      .where("createdBy", "in", ["system", customerId])
+      .get();
     for (const docSnap of querySnap.docs) {
       const category = { ...docSnap.data(), _id: docSnap.id };
       let children = [];
@@ -27,6 +31,7 @@ class CategoryService {
     name,
     symbol,
     parent_id,
+    createdBy,
     transaction_type,
   }) => {
     const categoryRef = db.collection("categories").doc();
@@ -34,6 +39,7 @@ class CategoryService {
       name: name,
       symbol: symbol,
       parent_id: parent_id || null,
+      createdBy: createdBy || "system",
       transaction_type: transaction_type || "expense",
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -52,7 +58,18 @@ class CategoryService {
     return { ...updateData, _id: id };
   };
   static deletedCategory = async (id) => {
-    return await db.collection("categories").doc(id).delete();
+    await db.collection("categories").doc(id).delete();
+    const budget = await db
+      .collection("budgets")
+      .where("category_id", "==", id)
+      .get();
+    if (budget) {
+      budget.forEach(
+        async (docSnap) =>
+          await db.collection("budgets").doc(docSnap.id).delete()
+      );
+    }
+    return;
   };
 }
 module.exports = CategoryService;

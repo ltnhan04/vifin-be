@@ -5,7 +5,7 @@ const authenticateToken = async (req, _res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new ErrorHandler("Invalid Token!", 401);
+      throw new ErrorHandler("Unauthorized!", 401);
     }
     const idToken = authHeader.split("Bearer ")[1];
     const decodedToken = await admin.auth().verifyIdToken(idToken);

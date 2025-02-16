@@ -1,9 +1,10 @@
 const CategoryService = require("../services/category.service");
 const ResponseHandler = require("../utils/response.handler");
 
-const getCategories = async (_req, res, next) => {
+const getCategories = async (req, res, next) => {
   try {
-    const categories = await CategoryService.getCategories();
+    const customerId = req.customer.user_id;
+    const categories = await CategoryService.getCategories(customerId);
     return ResponseHandler.sendSuccess(
       res,
       categories,
