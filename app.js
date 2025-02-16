@@ -7,6 +7,7 @@ const customerRoutes = require("./src/routes/customer.routes");
 const walletRoutes = require("./src/routes/wallet.routes");
 const categoriesRoutes = require("./src/routes/category.routes");
 const budgetRoutes = require("./src/routes/budget.routes");
+const transactionRoutes = require("./src/routes/transaction.routes");
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,7 @@ app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/wallet", walletRoutes);
 app.use("/api/v1/category", categoriesRoutes);
 app.use("/api/v1/budget", budgetRoutes);
+app.use("/api/v1/transactions/", transactionRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello World!");
