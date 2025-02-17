@@ -12,7 +12,7 @@ const transactionRoutes = require("./src/routes/transaction.routes");
 dotenv.config();
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.APP_PORT || 3000;
 app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
@@ -31,6 +31,4 @@ app.use((error, _req, res, _next) => {
   res.status(statusCode).json({ message });
 });
 
-app.listen(PORT, () =>
-  console.log(`Server is running on http://localhost:${PORT}`)
-);
+module.exports = app;

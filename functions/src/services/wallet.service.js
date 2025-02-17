@@ -1,5 +1,5 @@
 const { db } = require("../configs/firebase.config");
-const BudgetService = require("../services/budget.service");
+const BudgetService = require("./budget.service");
 
 class WalletService {
   static getWallets = async () => {
