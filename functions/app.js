@@ -31,4 +31,8 @@ app.use((error, _req, res, _next) => {
   res.status(statusCode).json({ message });
 });
 
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+});
+
 module.exports = app;
