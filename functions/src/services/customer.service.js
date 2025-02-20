@@ -6,12 +6,14 @@ class CustomerService {
     gender,
     email,
     uid,
+    role = "customer",
   }) => {
     const customerData = {
       avatar: avatar || null,
       full_name: full_name,
       gender: gender || "male",
       email: email,
+      role: role,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

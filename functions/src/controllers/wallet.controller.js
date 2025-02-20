@@ -15,6 +15,21 @@ const getWallets = async (_req, res, next) => {
   }
 };
 
+const getWallet = async (req, res, next) => {
+  try {
+    const walletId = req.params.id;
+    const transactions = await WalletService.getBudgetInWallet(walletId);
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      "Get Wallet Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createWallet = async (req, res, next) => {
   try {
     const wallet = await WalletService.createWallet({
@@ -62,4 +77,10 @@ const deleteWallet = async (req, res, next) => {
   }
 };
 
-module.exports = { createWallet, updateWallet, deleteWallet, getWallets };
+module.exports = {
+  createWallet,
+  updateWallet,
+  deleteWallet,
+  getWallets,
+  getWallet,
+};

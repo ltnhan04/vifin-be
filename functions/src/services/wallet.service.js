@@ -1,5 +1,5 @@
 const { db } = require("../configs/firebase.config");
-const BudgetService = require("./budget.service");
+const CategoryService = require("../services/category.service");
 
 class WalletService {
   static getWallets = async () => {
@@ -9,6 +9,23 @@ class WalletService {
       walletData.push({ ...docSnap.data(), _id: docSnap.id })
     );
     return walletData;
+  };
+  static getBudgetInWallet = async (walletId) => {
+    const budgetDocs = await db
+      .collection("budgets")
+      .where("wallet_id", "==", walletId)
+      .get();
+
+    const budgets = Promise.all(
+      budgetDocs.docs.map(async (doc) => {
+        const budgetData = { ...doc.data(), _id: doc.id };
+        const category = await CategoryService.getCategory(
+          budgetData.category_id
+        );
+        return { ...budgetData, category };
+      })
+    );
+    return budgets;
   };
   static createWallet = async ({
     symbol,
@@ -41,9 +58,24 @@ class WalletService {
       .collection("budgets")
       .where("wallet_id", "==", id)
       .get();
-    budget.forEach(
-      async (docSnap) => await db.collection("budgets").doc(docSnap.id).delete()
+    await Promise.all(
+      budget.forEach(
+        async (docSnap) =>
+          await db.collection("budgets").doc(docSnap.id).delete()
+      )
     );
+
+    const transaction = await db
+      .collection("transactions")
+      .where("wallet_id", "==", id)
+      .get();
+    await Promise.all(
+      transaction.forEach(
+        async (docSnap) =>
+          await db.collection("transactions").doc(docSnap.id).delete()
+      )
+    );
+
     return;
   };
 }

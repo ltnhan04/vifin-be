@@ -16,6 +16,20 @@ const getCategories = async (req, res, next) => {
   }
 };
 
+const getCategory = async (req, res, next) => {
+  try {
+    const categoryId = req.params.id;
+    const category = await CategoryService.getCategory(categoryId);
+    return ResponseHandler.sendSuccess(
+      res,
+      category,
+      200,
+      "Get category successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 const addCategory = async (req, res, next) => {
   try {
     const newCategory = await CategoryService.addCategory(req.body);
@@ -68,4 +82,5 @@ module.exports = {
   updatedCategory,
   deletedCategory,
   getCategories,
+  getCategory,
 };

@@ -5,10 +5,11 @@ const ResponseHandler = require("../utils/response.handler");
 const createTransaction = async (req, res, next) => {
   try {
     const customerId = req.customer.user_id;
-    const newTransaction = await TransactionService.createTransaction({
-      ...req.body,
-      customer_id: customerId,
-    });
+    const newTransaction =
+      await TransactionService.createTransactionWithWalletUpdate({
+        ...req.body,
+        customer_id: customerId,
+      });
     if (newTransaction) {
       return ResponseHandler.sendSuccess(
         res,
@@ -58,10 +59,11 @@ const getTransactions = async (req, res, next) => {
 const updateTransactions = async (req, res, next) => {
   try {
     const transactionId = req.params.id;
-    const updatedTransactions = await TransactionService.updateTransaction(
-      transactionId,
-      req.body
-    );
+    const updatedTransactions =
+      await TransactionService.updateTransactionWithWalletAdjustment(
+        transactionId,
+        req.body
+      );
     return ResponseHandler.sendSuccess(
       res,
       updatedTransactions,

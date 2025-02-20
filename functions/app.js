@@ -19,7 +19,7 @@ app.use("/v1/customer", customerRoutes);
 app.use("/v1/wallet", walletRoutes);
 app.use("/v1/category", categoriesRoutes);
 app.use("/v1/budget", budgetRoutes);
-app.use("/v1/transactions/", transactionRoutes);
+app.use("/v1/transactions", transactionRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello World!");

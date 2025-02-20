@@ -1,5 +1,4 @@
 const { db } = require("../configs/firebase.config");
-const BudgetService = require("../services/budget.service");
 
 class CategoryService {
   static getCategories = async (customerId) => {
@@ -25,6 +24,14 @@ class CategoryService {
     }
 
     return categoryData;
+  };
+
+  static getCategory = async (categoryId) => {
+    const category = await db.collection("categories").doc(categoryId).get();
+    if (category.exists) {
+      return { ...category.data(), _id: category.id };
+    }
+    return null;
   };
 
   static addCategory = async ({
@@ -63,12 +70,22 @@ class CategoryService {
       .collection("budgets")
       .where("category_id", "==", id)
       .get();
-    if (budget) {
+    await Promise.all(
       budget.forEach(
         async (docSnap) =>
           await db.collection("budgets").doc(docSnap.id).delete()
-      );
-    }
+      )
+    );
+    const transaction = await db
+      .collection("transactions")
+      .where("category_id", "==", id)
+      .get();
+    await Promise.all(
+      transaction.forEach(
+        async (docSnap) =>
+          await db.collection("transactions").doc(docSnap.id).delete()
+      )
+    );
     return;
   };
 }
