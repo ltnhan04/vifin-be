@@ -32,7 +32,10 @@ const getCategory = async (req, res, next) => {
 };
 const addCategory = async (req, res, next) => {
   try {
-    const newCategory = await CategoryService.addCategory(req.body);
+    const newCategory = await CategoryService.addCategory({
+      ...req.body,
+      symbol: req.files[0],
+    });
     return ResponseHandler.sendSuccess(
       res,
       newCategory,
@@ -47,10 +50,11 @@ const addCategory = async (req, res, next) => {
 const updatedCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
-    const category = await CategoryService.updatedCategory(
-      categoryId,
-      req.body
-    );
+    const file = req.files[0];
+    const category = await CategoryService.updatedCategory(categoryId, {
+      ...req.body,
+      symbol: file,
+    });
     return ResponseHandler.sendSuccess(
       res,
       category,

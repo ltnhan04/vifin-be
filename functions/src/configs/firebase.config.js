@@ -1,6 +1,7 @@
 const { initializeApp, cert } = require("firebase-admin/app");
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
+const { getStorage } = require("firebase-admin/storage");
 const path = require("path");
 const dotenv = require("dotenv");
 const fs = require("fs");
@@ -19,6 +20,8 @@ const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
 initializeApp({
   credential: cert(serviceAccount),
   databaseURL: process.env.DB_URL,
+  storageBucket: "vifin-app.firebasestorage.app",
 });
 const db = getFirestore();
-module.exports = { db, admin };
+const bucket = getStorage().bucket();
+module.exports = { db, admin, bucket };

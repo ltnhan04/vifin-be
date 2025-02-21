@@ -44,31 +44,24 @@ class TransactionService {
 
     return transactions;
   };
-  static getTransactionsByWallet = async (walletId, customerId) => {
+  static getTransactionsByWalletAndType = async ({
+    walletId,
+    customerId,
+    type,
+  }) => {
+    console.log({ walletId, customerId, type });
     const wallets = [];
     const querySnap = await db
       .collection("transactions")
       .where("customer_id", "==", customerId)
       .where("wallet_id", "==", walletId)
+      .where("transaction_type", "==", type)
       .get();
 
     querySnap.forEach((docSnap) =>
       wallets.push({ ...docSnap.data(), _id: docSnap.id })
     );
     return wallets;
-  };
-  static getTransactionByType = async (type, customerId) => {
-    const types = [];
-    const querySnap = await db
-      .collection("transactions")
-      .where("customer_id", "==", customerId)
-      .where("transaction_type", "==", type)
-      .get();
-
-    querySnap.forEach((docSnap) =>
-      types.push({ ...docSnap.data(), _id: docSnap.id })
-    );
-    return types;
   };
   static getStatistics = async (customerId) => {};
 

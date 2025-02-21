@@ -7,11 +7,12 @@ const {
   getCategory,
 } = require("../controllers/category.controller");
 const { authenticateToken } = require("../middlewares/auth.middleware");
+const { uploadImage } = require("../utils/upload");
 
+router.post("/", uploadImage, addCategory);
 router.get("/", authenticateToken, getCategories);
 router.get("/:id", authenticateToken, getCategory);
-router.post("/", addCategory);
-router.put("/:id", authenticateToken, updatedCategory);
+router.put("/:id", authenticateToken, uploadImage, updatedCategory);
 router.delete("/:id", authenticateToken, deletedCategory);
 
 module.exports = router;

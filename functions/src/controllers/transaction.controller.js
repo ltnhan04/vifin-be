@@ -41,6 +41,28 @@ const getTransaction = async (req, res, next) => {
   }
 };
 
+const filterTransactions = async (req, res, next) => {
+  try {
+    const customerId = req.customer.user_id;
+    const { walletId, type } = req.query;
+
+    const transactions =
+      await TransactionService.getTransactionsByWalletAndType({
+        walletId,
+        type,
+        customerId,
+      });
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      "Filter Transactions Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getTransactions = async (req, res, next) => {
   try {
     const customerId = req.customer.user_id;
@@ -96,4 +118,5 @@ module.exports = {
   getTransactions,
   updateTransactions,
   deleteTransactions,
+  filterTransactions,
 };

@@ -35,6 +35,7 @@ const createWallet = async (req, res, next) => {
     const wallet = await WalletService.createWallet({
       ...req.body,
       customer_id: req.customer.user_id,
+      symbol: req.files[0],
     });
     return ResponseHandler.sendSuccess(
       res,
@@ -50,7 +51,10 @@ const createWallet = async (req, res, next) => {
 const updateWallet = async (req, res, next) => {
   try {
     const walletId = req.params.id;
-    const wallet = await WalletService.updateWallet(walletId, req.body);
+    const wallet = await WalletService.updateWallet(walletId, {
+      ...req.body,
+      symbol: req.files[0] || null,
+    });
     return ResponseHandler.sendSuccess(
       res,
       wallet,

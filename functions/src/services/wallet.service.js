@@ -1,5 +1,6 @@
 const { db } = require("../configs/firebase.config");
-const CategoryService = require("../services/category.service");
+const ErrorHandler = require("../middlewares/error.handler");
+const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
 
 class WalletService {
   static getWallets = async () => {
@@ -10,6 +11,7 @@ class WalletService {
     );
     return walletData;
   };
+
   static getBudgetInWallet = async (walletId) => {
     const budgetDocs = await db
       .collection("budgets")
@@ -27,6 +29,7 @@ class WalletService {
     );
     return budgets;
   };
+
   static createWallet = async ({
     symbol,
     wallet_name,
@@ -34,9 +37,14 @@ class WalletService {
     currency_unit = "VND",
     amount,
   }) => {
+    let imageUrl = null;
+    if (symbol) {
+      imageUrl = await createImageUrl(symbol);
+    }
+
     const walletRef = db.collection("wallets").doc();
     const walletData = {
-      symbol: symbol || null,
+      symbol: imageUrl,
       wallet_name: wallet_name || null,
       customer_id: customer_id,
       currency_unit: currency_unit,
@@ -44,35 +52,75 @@ class WalletService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    await db.collection("wallets").doc(walletRef.id).set(walletData);
+
+    await walletRef.set(walletData);
     return { ...walletData, _id: walletRef.id };
   };
+
   static updateWallet = async (id, data) => {
-    const updateData = { ...data, updatedAt: new Date() };
-    await db.collection("wallets").doc(id).update(updateData);
+    const walletRef = db.collection("wallets").doc(id);
+    const walletDoc = await walletRef.get();
+
+    if (!walletDoc.exists) {
+      throw new ErrorHandler("Wallet not found", 404);
+    }
+
+    const walletData = walletDoc.data();
+
+    let imageUrl = walletData.symbol;
+    if (data.symbol) {
+      imageUrl = await createImageUrl(data.symbol);
+
+      if (walletData.symbol) {
+        await deleteImageFromStorage(walletData.symbol);
+      }
+    }
+
+    const updateData = {
+      ...data,
+      symbol: imageUrl,
+      updatedAt: new Date(),
+    };
+
+    await walletRef.update(updateData);
     return { ...updateData, _id: id };
   };
+
   static deleteWallet = async (id) => {
-    await db.collection("wallets").doc(id).delete();
-    const budget = await db
+    const walletRef = db.collection("wallets").doc(id);
+    const walletDoc = await walletRef.get();
+
+    if (!walletDoc.exists) {
+      throw new ErrorHandler("Wallet not found", 404);
+    }
+
+    const walletData = walletDoc.data();
+
+    if (walletData.symbol) {
+      await deleteImageFromStorage(walletData.symbol);
+    }
+
+    await walletRef.delete();
+
+    const budgetDocs = await db
       .collection("budgets")
       .where("wallet_id", "==", id)
       .get();
+
     await Promise.all(
-      budget.forEach(
-        async (docSnap) =>
-          await db.collection("budgets").doc(docSnap.id).delete()
+      budgetDocs.docs.map(async (doc) =>
+        db.collection("budgets").doc(doc.id).delete()
       )
     );
 
-    const transaction = await db
+    const transactionDocs = await db
       .collection("transactions")
       .where("wallet_id", "==", id)
       .get();
+
     await Promise.all(
-      transaction.forEach(
-        async (docSnap) =>
-          await db.collection("transactions").doc(docSnap.id).delete()
+      transactionDocs.docs.map(async (doc) =>
+        db.collection("transactions").doc(doc.id).delete()
       )
     );
 

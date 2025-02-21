@@ -1,4 +1,5 @@
 const { db } = require("../configs/firebase.config");
+const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
 
 class CategoryService {
   static getCategories = async (customerId) => {
@@ -19,17 +20,18 @@ class CategoryService {
           children.push({ ...snap.data(), _id: snap.id })
         );
       }
-
       categoryData.push({ ...category, children });
     }
-
     return categoryData;
   };
 
   static getCategory = async (categoryId) => {
-    const category = await db.collection("categories").doc(categoryId).get();
-    if (category.exists) {
-      return { ...category.data(), _id: category.id };
+    const categorySnap = await db
+      .collection("categories")
+      .doc(categoryId)
+      .get();
+    if (categorySnap.exists) {
+      return { ...categorySnap.data(), _id: categorySnap.id };
     }
     return null;
   };
@@ -42,9 +44,10 @@ class CategoryService {
     transaction_type,
   }) => {
     const categoryRef = db.collection("categories").doc();
+    const imageUrl = await createImageUrl(symbol);
     const categoryData = {
-      name: name,
-      symbol: symbol,
+      name,
+      symbol: imageUrl,
       parent_id: parent_id || null,
       createdBy: createdBy || "system",
       transaction_type: transaction_type || "expense",
@@ -56,37 +59,72 @@ class CategoryService {
 
     return { ...categoryData, _id: categoryRef.id };
   };
+
   static updatedCategory = async (id, data) => {
-    const updateData = {
-      ...data,
-      updatedAt: new Date(),
-    };
-    await db.collection("categories").doc(id).update(updateData);
+    const categoryRef = db.collection("categories").doc(id);
+    const categorySnap = await categoryRef.get();
+    if (!categorySnap.exists) {
+      throw new Error("Category not found");
+    }
+
+    const updateData = { ...data, updatedAt: new Date() };
+
+    if (data.symbol) {
+      const oldData = categorySnap.data();
+      if (oldData.symbol) {
+        try {
+          await deleteImageFromStorage(oldData.symbol);
+        } catch (error) {
+          console.error("Error deleting old image: ", error);
+        }
+      }
+      const newImageUrl = await createImageUrl(data.symbol);
+      updateData.symbol = newImageUrl;
+    }
+
+    await categoryRef.update(updateData);
     return { ...updateData, _id: id };
   };
+
   static deletedCategory = async (id) => {
-    await db.collection("categories").doc(id).delete();
-    const budget = await db
+    const categoryRef = db.collection("categories").doc(id);
+    const categorySnap = await categoryRef.get();
+    if (!categorySnap.exists) {
+      throw new Error("Category not found");
+    }
+
+    const categoryData = categorySnap.data();
+    if (categoryData.symbol) {
+      try {
+        await deleteImageFromStorage(categoryData.symbol);
+      } catch (error) {
+        console.error("Error deleting category image: ", error);
+      }
+    }
+
+    await categoryRef.delete();
+
+    const budgetSnap = await db
       .collection("budgets")
       .where("category_id", "==", id)
       .get();
     await Promise.all(
-      budget.forEach(
-        async (docSnap) =>
-          await db.collection("budgets").doc(docSnap.id).delete()
+      budgetSnap.docs.map((docSnap) =>
+        db.collection("budgets").doc(docSnap.id).delete()
       )
     );
-    const transaction = await db
+
+    const transactionSnap = await db
       .collection("transactions")
       .where("category_id", "==", id)
       .get();
     await Promise.all(
-      transaction.forEach(
-        async (docSnap) =>
-          await db.collection("transactions").doc(docSnap.id).delete()
+      transactionSnap.docs.map((docSnap) =>
+        db.collection("transactions").doc(docSnap.id).delete()
       )
     );
     return;
   };
 }
+
 module.exports = CategoryService;

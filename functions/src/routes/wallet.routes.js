@@ -7,11 +7,12 @@ const {
   getWallets,
   getWallet,
 } = require("../controllers/wallet.controller");
+const { uploadImage } = require("../utils/upload");
 
 router.get("/", authenticateToken, getWallets);
-router.get("/:id", authenticateToken, getWallet);
+router.get("/:id", authenticateToken, uploadImage, getWallet);
 router.post("/", authenticateToken, createWallet);
-router.put("/:id", authenticateToken, updateWallet);
+router.put("/:id", authenticateToken, uploadImage, updateWallet);
 router.delete("/:id", authenticateToken, deleteWallet);
 
 module.exports = router;
