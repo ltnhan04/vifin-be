@@ -5,13 +5,14 @@ const {
   updateWallet,
   deleteWallet,
   getWallets,
-  getWallet,
+  getBudget,
 } = require("../controllers/wallet.controller");
 const { uploadImage } = require("../utils/upload");
 
+
 router.get("/", authenticateToken, getWallets);
-router.get("/:id", authenticateToken, uploadImage, getWallet);
-router.post("/", authenticateToken, createWallet);
+router.get("/:id", authenticateToken, getBudget);
+router.post("/", authenticateToken, uploadImage, createWallet);
 router.put("/:id", authenticateToken, uploadImage, updateWallet);
 router.delete("/:id", authenticateToken, deleteWallet);
 

@@ -20,7 +20,7 @@ const createCustomer = async (req, res, next) => {
 };
 const getCustomers = async (req, res, next) => {
   try {
-    const customerId = req.customer.user_id;
+    const customerId = req.params.id;
     const getCustomerInfo = await CustomerService.getCustomer(customerId);
     return ResponseHandler.sendSuccess(
       res,

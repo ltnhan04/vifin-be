@@ -6,6 +6,7 @@ class CustomerService {
     gender,
     email,
     uid,
+    provider,
     role = "customer",
   }) => {
     const customerData = {
@@ -14,10 +15,14 @@ class CustomerService {
       gender: gender || "male",
       email: email,
       role: role,
+      provider: provider,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    await db.collection("customers").doc(uid).set(customerData);
+    await db
+      .collection("customers")
+      .doc(uid)
+      .set(customerData, { merge: true });
     return { ...customerData, _id: uid };
   };
   static getCustomer = async (uid) => {

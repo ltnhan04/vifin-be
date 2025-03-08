@@ -6,6 +6,6 @@ const {
 } = require("../controllers/customer.controller");
 
 router.post("/", authenticateToken, createCustomer);
-router.get("/", authenticateToken, getCustomers);
+router.get("/:id", authenticateToken, getCustomers);
 
 module.exports = router;

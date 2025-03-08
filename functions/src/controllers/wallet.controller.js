@@ -15,7 +15,7 @@ const getWallets = async (_req, res, next) => {
   }
 };
 
-const getWallet = async (req, res, next) => {
+const getBudget = async (req, res, next) => {
   try {
     const walletId = req.params.id;
     const transactions = await WalletService.getBudgetInWallet(walletId);
@@ -37,6 +37,7 @@ const createWallet = async (req, res, next) => {
       customer_id: req.customer.user_id,
       symbol: req.files[0],
     });
+    console.log(wallet);
     return ResponseHandler.sendSuccess(
       res,
       wallet,
@@ -72,7 +73,7 @@ const deleteWallet = async (req, res, next) => {
     const deletedWallet = await WalletService.deleteWallet(walletId);
     return ResponseHandler.sendSuccess(
       res,
-      "",
+      deletedWallet,
       200,
       "Deleted Wallet Successfully"
     );
@@ -86,5 +87,5 @@ module.exports = {
   updateWallet,
   deleteWallet,
   getWallets,
-  getWallet,
+  getBudget,
 };
