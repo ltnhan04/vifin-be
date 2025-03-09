@@ -35,6 +35,7 @@ const createImageUrl = async (imageFile) => {
       metadata: {
         contentType: imageFile.mimetype,
       },
+      public: true,
     });
 
     blobStream.on("error", (err) => reject(err));
