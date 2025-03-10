@@ -69,10 +69,10 @@ const updatedCategory = async (req, res, next) => {
 const deletedCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
-    await CategoryService.deletedCategory(categoryId);
+    const category = await CategoryService.deletedCategory(categoryId);
     return ResponseHandler.sendSuccess(
       res,
-      "",
+      category,
       200,
       "Deleted Created Successfully"
     );
