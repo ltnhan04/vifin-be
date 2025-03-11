@@ -1,4 +1,5 @@
 const { db } = require("../configs/firebase.config");
+const ErrorHandler = require("../middlewares/error.handler");
 class BudgetService {
   static getBudgets = async () => {
     const budgets = [];
@@ -9,11 +10,11 @@ class BudgetService {
     return budgets;
   };
   static getBudgetById = async (budgetId) => {
-    const docSnap = await db.collection("budgets").doc(budgetId).get();
-    if (docSnap.exists) {
-      return { ...docSnap.data(), _id: budgetId };
+    const budgetDoc = await db.collection("budgets").doc(budgetId).get();
+    if (!budgetDoc.exists) {
+      return ErrorHandler("Budget not found", 404);
     }
-    return null;
+    return budgetDoc.data();
   };
   static createBudget = async ({
     category_id,
@@ -53,8 +54,9 @@ class BudgetService {
     return { ...budgetData, _id: budgetId };
   };
   static deleteBudget = async (budgetId) => {
+    const budgetData = await this.getBudgetById(budgetId);
     await db.collection("budgets").doc(budgetId).delete();
-    return { success: true };
+    return { ...budgetData, _id: budgetId };
   };
 
   static getBudgetUsage = async (budgetId) => {

@@ -5,24 +5,29 @@ const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
 class CategoryService {
   static getCategories = async (customerId) => {
     const categoryData = [];
+    const categoriesMap = new Map();
+
     const querySnap = await db
       .collection("categories")
       .where("createdBy", "in", ["system", customerId])
       .get();
-    for (const docSnap of querySnap.docs) {
-      const category = { ...docSnap.data(), _id: docSnap.id };
-      let children = [];
-      if (!category.parent_id) {
-        const childrenSnap = await db
-          .collection("categories")
-          .where("parent_id", "==", category._id)
-          .get();
-        childrenSnap.forEach((snap) =>
-          children.push({ ...snap.data(), _id: snap.id })
-        );
+
+    querySnap.docs.forEach((docSnap) => {
+      const category = { ...docSnap.data(), _id: docSnap.id, children: [] };
+      categoriesMap.set(category._id, category);
+    });
+
+    categoriesMap.forEach((category) => {
+      if (category.parent_id) {
+        const parentCategory = categoriesMap.get(category.parent_id);
+        if (parentCategory) {
+          parentCategory.children.push(category);
+        }
+      } else {
+        categoryData.push(category);
       }
-      categoryData.push({ ...category, children });
-    }
+    });
+
     return categoryData;
   };
 

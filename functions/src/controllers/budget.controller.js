@@ -43,10 +43,10 @@ const updateBudget = async (req, res, next) => {
 const deletedBudget = async (req, res, next) => {
   try {
     const budgetId = req.params.id;
-    await BudgetService.deleteBudget(budgetId);
+    const budget = await BudgetService.deleteBudget(budgetId);
     return ResponseHandler.sendSuccess(
       res,
-      "",
+      budget,
       200,
       "Deleted Budget Successfully"
     );
