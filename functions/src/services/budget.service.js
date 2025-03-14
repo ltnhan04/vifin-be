@@ -1,5 +1,7 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
+const CategoryService = require("../services/category.service");
+const WalletService = require("../services/wallet.service");
 class BudgetService {
   static getBudgets = async () => {
     const budgets = [];
@@ -12,10 +14,34 @@ class BudgetService {
   static getBudgetById = async (budgetId) => {
     const budgetDoc = await db.collection("budgets").doc(budgetId).get();
     if (!budgetDoc.exists) {
-      return ErrorHandler("Budget not found", 404);
+      throw new ErrorHandler("Budget not found", 404);
     }
-    return budgetDoc.data();
+    return { ...budgetDoc.data(), _id: budgetId };
   };
+  static getBudgetByRepeatType = async (walletId, repeat_type) => {
+    const budgetDocs = await db
+      .collection("budgets")
+      .where("wallet_id", "==", walletId)
+      .where("repeat_type", "==", repeat_type)
+      .get();
+
+    const budgetPromises = budgetDocs.docs.map(async (doc) => {
+      const budgetData = { ...doc.data(), _id: doc.id };
+      const [category, wallet] = await Promise.all([
+        CategoryService.getCategory(budgetData.category_id),
+        WalletService.getWallet(budgetData.wallet_id),
+      ]);
+      const { category_id, wallet_id, ...budgetWithoutIds } = budgetData;
+      return {
+        ...budgetWithoutIds,
+        category,
+        wallet,
+      };
+    });
+
+    return await Promise.all(budgetPromises);
+  };
+
   static createBudget = async ({
     category_id,
     wallet_id,
@@ -30,8 +56,8 @@ class BudgetService {
     const budgetData = {
       category_id: category_id,
       wallet_id: wallet_id,
-      startDate: startDate,
-      dueDate: dueDate,
+      startDate: new Date(startDate),
+      dueDate: new Date(dueDate),
       amount: amount || 0,
       usage: 0,
       repeat_type: repeat_type,
@@ -46,12 +72,19 @@ class BudgetService {
     return { ...budgetData, _id: budgetRef };
   };
   static updateBudget = async (budgetId, data) => {
+    if (data.startDate) {
+      data.startDate = new Date(data.startDate);
+    }
+    if (data.dueDate) {
+      data.dueDate = new Date(data.dueDate);
+    }
     const budgetData = {
       ...data,
       updatedAt: new Date(),
     };
     await db.collection("budgets").doc(budgetId).update(budgetData);
-    return { ...budgetData, _id: budgetId };
+    const updatedBudget = await this.getBudgetById(budgetId);
+    return { ...updatedBudget, _id: budgetId };
   };
   static deleteBudget = async (budgetId) => {
     const budgetData = await this.getBudgetById(budgetId);
@@ -60,8 +93,8 @@ class BudgetService {
   };
 
   static getBudgetUsage = async (budgetId) => {
-    const budgetSnap = await db.collection("budgets").doc(budgetId).get();
-    return budgetSnap.data().usage;
+    const budgetDoc = await db.collection("budgets").doc(budgetId).get();
+    return budgetDoc.data().usage;
   };
 
   static checkBudgetCompletion = async (budget) => {
@@ -105,7 +138,7 @@ class BudgetService {
     const newDueDate = new Date(dueDate);
     switch (repeat_type) {
       case "weekly": {
-        return newDueDate.setDate(newDueDate.getDate + 7);
+        return newDueDate.setDate(newDueDate.getDate() + 7);
       }
       case "monthly": {
         return newDueDate.setMonth(newDueDate.getMonth() + 1);

@@ -6,11 +6,13 @@ const {
   deletedBudget,
   getBudget,
   getBudgets,
+  getBudgetByRepeatType,
 } = require("../controllers/budget.controller");
 
+router.get("/", authenticateToken, getBudgets);
+router.get("/filter", authenticateToken, getBudgetByRepeatType);
+router.get("/:id", authenticateToken, getBudget);
 router.post("/", authenticateToken, createNewBudget);
 router.put("/:id", authenticateToken, updateBudget);
 router.delete("/:id", authenticateToken, deletedBudget);
-router.get("/", authenticateToken, getBudgets);
-router.get("/:id", authenticateToken, getBudget);
 module.exports = router;

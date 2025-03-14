@@ -1,6 +1,6 @@
 const { initializeApp, cert } = require("firebase-admin/app");
 const admin = require("firebase-admin");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
 const path = require("path");
 const dotenv = require("dotenv");
@@ -24,4 +24,4 @@ initializeApp({
 });
 const db = getFirestore();
 const bucket = getStorage().bucket();
-module.exports = { db, admin, bucket };
+module.exports = { db, admin, bucket, Timestamp };

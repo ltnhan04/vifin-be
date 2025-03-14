@@ -1,7 +1,6 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
-const CategoryService = require("../services/category.service");
 
 class WalletService {
   static getWallets = async () => {
@@ -20,24 +19,6 @@ class WalletService {
     return walletDoc.data();
   };
 
-  static getBudgetInWallet = async (walletId) => {
-    const budgetDocs = await db
-      .collection("budgets")
-      .where("wallet_id", "==", walletId)
-      .get();
-
-    const budgets = Promise.all(
-      budgetDocs.docs.map(async (doc) => {
-        const budgetData = { ...doc.data(), _id: doc.id };
-        const category = await CategoryService.getCategory(
-          budgetData.category_id
-        );
-        return { ...budgetData, category };
-      })
-    );
-    return budgets;
-  };
-
   static createWallet = async ({
     symbol,
     wallet_name,
@@ -49,7 +30,6 @@ class WalletService {
     if (symbol) {
       imageUrl = await createImageUrl(symbol);
     }
-
     const walletRef = db.collection("wallets").doc();
     const walletData = {
       symbol: imageUrl,
@@ -60,7 +40,6 @@ class WalletService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
     await walletRef.set(walletData);
     return { ...walletData, _id: walletRef.id };
   };
@@ -68,13 +47,10 @@ class WalletService {
   static updateWallet = async (id, data) => {
     const walletRef = db.collection("wallets").doc(id);
     const walletData = await this.getWallet(id);
-
     if (!walletData) {
       throw new ErrorHandler("Wallet not found", 404);
     }
-
     let imageUrl = walletData.symbol;
-
     if (data.symbol) {
       imageUrl = await createImageUrl(data.symbol);
       if (walletData.symbol) {

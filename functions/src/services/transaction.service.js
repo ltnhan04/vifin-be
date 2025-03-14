@@ -1,29 +1,168 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
+const { getDateRange, formattedTransactionDate } = require("../utils/date");
 class TransactionService {
   static getTransactionById = async (transactionId) => {
     const docSnap = await db
       .collection("transactions")
       .doc(transactionId)
       .get();
-    if (docSnap.exists) {
-      return { ...docSnap.data(), _id: docSnap.id };
+    if (!docSnap.exists) {
+      throw new ErrorHandler("Transaction not found", 404);
     }
-    return null;
+    return { ...docSnap.data(), _id: docSnap.id };
   };
-  static getTransactions = async (customerId) => {
+  static getRecentTransactions = async (walletId, limit) => {
+    const snapShot = await db
+      .collection("transactions")
+      .where("wallet_id", "==", walletId)
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .get();
+    if (snapShot.empty) {
+      throw new ErrorHandler("No transactions found", 404);
+    }
+    const transactions = snapShot.docs.map((docs) => ({
+      ...docs.data(),
+      _id: docs.id,
+    }));
+    return transactions;
+  };
+  static getStatisticByWeek = async (
+    transaction_type,
+    walletId,
+    customerId
+  ) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("week");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        type: transaction_type,
+        startTimestamp,
+        endTimestamp,
+      });
+      const transactionsByDay = {};
+      let totalAmount = 0;
+      transactions.forEach((transaction) => {
+        const chain = formattedTransactionDate(transaction.createdAt.toDate());
+        if (!transactionsByDay[chain]) {
+          transactionsByDay[chain] = { total: 0, transactions: [] };
+        }
+
+        transactionsByDay[chain].total += transaction.amount;
+        transactionsByDay[chain].transactions.push(transaction);
+        totalAmount += transaction.amount;
+      });
+
+      return {
+        totalAmount,
+        transactionsByDay,
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
+  };
+  static getStatisticByMonth = async (
+    transaction_type,
+    walletId,
+    customerId
+  ) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("month");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        type: transaction_type,
+        startTimestamp,
+        endTimestamp,
+      });
+      const transactionsByMonth = {};
+      let totalAmount = 0;
+
+      transactions.forEach((transaction) => {
+        const monthKey = transaction.createdAt.toDate().getMonth() + 1;
+        if (!transactionsByMonth[monthKey]) {
+          transactionsByMonth[monthKey] = { total: 0, transactions: [] };
+        }
+        transactionsByMonth[monthKey].total += transaction.amount;
+        transactionsByMonth[monthKey].transactions.push(transaction);
+        totalAmount += transaction.amount;
+      });
+
+      return {
+        totalAmount,
+        transactionsByMonth,
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
+  };
+  static getStatisticByYear = async (
+    transaction_type,
+    walletId,
+    customerId,
+    startYear,
+    endYear
+  ) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("year");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        type: transaction_type,
+        startTimestamp,
+        endTimestamp,
+      });
+      const transactionsByYear = {};
+      let totalAmount = 0;
+
+      transactions.forEach((transaction) => {
+        const yearKey = transaction.createdAt.toDate().getFullYear().toString();
+        if (!transactionsByYear[yearKey]) {
+          transactionsByYear[yearKey] = { total: 0, transactions: [] };
+        }
+        transactionsByYear[yearKey].total += transaction.amount;
+        transactionsByYear[yearKey].transactions.push(transaction);
+        totalAmount += transaction.amount;
+      });
+
+      return {
+        totalAmount,
+        transactionsByYear,
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
+  };
+  static getTransactionsByWalletAndType = async ({
+    walletId,
+    customerId,
+    type,
+    startTimestamp,
+    endTimestamp,
+  }) => {
     const transactions = [];
     const querySnap = await db
       .collection("transactions")
       .where("customer_id", "==", customerId)
+      .where("wallet_id", "==", walletId)
+      .where("transaction_type", "==", type)
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<=", endTimestamp)
+      .orderBy("createdAt", "asc")
       .get();
+
     querySnap.forEach((docSnap) =>
       transactions.push({ ...docSnap.data(), _id: docSnap.id })
     );
+
     return transactions;
   };
+
   static deleteTransaction = async (transactionId) => {
-    return await db.collection("transactions").doc(transactionId).delete();
+    await db.collection("transactions").doc(transactionId).delete();
+    return await this.getTransactionById(transactionId);
   };
 
   static getTransactionsByDateRange = async (
@@ -48,22 +187,26 @@ class TransactionService {
     walletId,
     customerId,
     type,
+    startTimestamp,
+    endTimestamp,
   }) => {
-    console.log({ walletId, customerId, type });
-    const wallets = [];
+    const transactions = [];
     const querySnap = await db
       .collection("transactions")
       .where("customer_id", "==", customerId)
       .where("wallet_id", "==", walletId)
       .where("transaction_type", "==", type)
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<=", endTimestamp)
+      .orderBy("createdAt", "asc")
       .get();
 
     querySnap.forEach((docSnap) =>
-      wallets.push({ ...docSnap.data(), _id: docSnap.id })
+      transactions.push({ ...docSnap.data(), _id: docSnap.id })
     );
-    return wallets;
+
+    return transactions;
   };
-  static getStatistics = async (customerId) => {};
 
   static createTransactionWithWalletUpdate = async ({
     amount,

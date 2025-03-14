@@ -40,6 +40,77 @@ const getTransaction = async (req, res, next) => {
     next(error);
   }
 };
+const weeklyTransaction = async (req, res, next) => {
+  try {
+    const { walletId, type } = req.query;
+    const transactions = await TransactionService.getStatisticByWeek(
+      type,
+      walletId,
+      req.customer.user_id
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      " Get Transactions By Week Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+const monthlyTransaction = async (req, res, next) => {
+  try {
+    const { walletId, type } = req.query;
+    const transactions = await TransactionService.getStatisticByMonth(
+      type,
+      walletId,
+      req.customer.user_id
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      "Get Transactions By Month Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+const yearlyTransaction = async (req, res, next) => {
+  try {
+    const { walletId, type } = req.query;
+    const transactions = await TransactionService.getStatisticByYear(
+      type,
+      walletId,
+      req.customer.user_id
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      "Get Transactions By Year Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+const recentTransactions = async (req, res, next) => {
+  try {
+    const { walletId, limit } = req.query;
+    const transactions = await TransactionService.getRecentTransactions(
+      walletId,
+      Number(limit)
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      transactions,
+      200,
+      "Get recent transactions successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 const filterTransactions = async (req, res, next) => {
   try {
@@ -57,21 +128,6 @@ const filterTransactions = async (req, res, next) => {
       transactions,
       200,
       "Filter Transactions Successfully"
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getTransactions = async (req, res, next) => {
-  try {
-    const customerId = req.customer.user_id;
-    const transactions = await TransactionService.getTransactions(customerId);
-    return ResponseHandler.sendSuccess(
-      res,
-      transactions,
-      200,
-      "Get Transactions Successfully"
     );
   } catch (error) {
     next(error);
@@ -115,8 +171,11 @@ const deleteTransactions = async (req, res, next) => {
 module.exports = {
   createTransaction,
   getTransaction,
-  getTransactions,
   updateTransactions,
   deleteTransactions,
   filterTransactions,
+  recentTransactions,
+  weeklyTransaction,
+  monthlyTransaction,
+  yearlyTransaction,
 };

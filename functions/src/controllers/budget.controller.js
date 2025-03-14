@@ -20,9 +20,6 @@ const updateBudget = async (req, res, next) => {
   try {
     const budgetId = req.params.id;
     let budget = await BudgetService.getBudgetById(budgetId);
-    if (!budget) {
-      throw new ErrorHandler("Budget Not Found", 404);
-    }
     await BudgetService.updateBudget(budgetId, req.body);
     budget = await BudgetService.getBudgetById(budgetId);
     await BudgetService.checkBudgetCompletion(budget);
@@ -86,6 +83,23 @@ const getBudget = async (req, res, next) => {
     next(error);
   }
 };
+const getBudgetByRepeatType = async (req, res, next) => {
+  try {
+    const { walletId, repeat_type } = req.query;
+    const budgets = await BudgetService.getBudgetByRepeatType(
+      walletId,
+      repeat_type.replace(/"/g, "")
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      budgets,
+      200,
+      "Get budgets by repeat type successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   createNewBudget,
@@ -93,4 +107,5 @@ module.exports = {
   getBudget,
   getBudgets,
   deletedBudget,
+  getBudgetByRepeatType,
 };
