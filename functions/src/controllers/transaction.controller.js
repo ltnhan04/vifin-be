@@ -44,7 +44,7 @@ const weeklyTransaction = async (req, res, next) => {
   try {
     const { walletId, type } = req.query;
     const transactions = await TransactionService.getStatisticByWeek(
-      type,
+      type.replace(/"/g, ""),
       walletId,
       req.customer.user_id
     );
@@ -62,7 +62,7 @@ const monthlyTransaction = async (req, res, next) => {
   try {
     const { walletId, type } = req.query;
     const transactions = await TransactionService.getStatisticByMonth(
-      type,
+      type.replace(/"/g, ""),
       walletId,
       req.customer.user_id
     );
@@ -80,7 +80,7 @@ const yearlyTransaction = async (req, res, next) => {
   try {
     const { walletId, type } = req.query;
     const transactions = await TransactionService.getStatisticByYear(
-      type,
+      type.replace(/"/g, ""),
       walletId,
       req.customer.user_id
     );
@@ -156,10 +156,12 @@ const updateTransactions = async (req, res, next) => {
 const deleteTransactions = async (req, res, next) => {
   try {
     const transactionId = req.params.id;
-    await TransactionService.deleteTransaction(transactionId);
+    const deletedTransaction = await TransactionService.deleteTransaction(
+      transactionId
+    );
     return ResponseHandler.sendSuccess(
       res,
-      "",
+      deletedTransaction,
       200,
       "Deleted Transaction Successfully"
     );

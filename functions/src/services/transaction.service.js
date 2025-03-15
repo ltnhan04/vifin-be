@@ -19,15 +19,35 @@ class TransactionService {
       .orderBy("createdAt", "desc")
       .limit(limit)
       .get();
+
     if (snapShot.empty) {
       throw new ErrorHandler("No transactions found", 404);
     }
-    const transactions = snapShot.docs.map((docs) => ({
-      ...docs.data(),
-      _id: docs.id,
-    }));
+    const transactions = await Promise.all(
+      snapShot.docs.map(async (doc) => {
+        const transaction = { ...doc.data(), _id: doc.id };
+        const walletSnap = await db
+          .collection("wallets")
+          .doc(transaction.wallet_id)
+          .get();
+        transaction.wallet = walletSnap.exists
+          ? { _id: walletSnap.id, ...walletSnap.data() }
+          : null;
+        const categorySnap = await db
+          .collection("categories")
+          .doc(transaction.category_id)
+          .get();
+        transaction.category = categorySnap.exists
+          ? { _id: categorySnap.id, ...categorySnap.data() }
+          : null;
+        delete transaction.wallet_id;
+        delete transaction.category_id;
+        return transaction;
+      })
+    );
     return transactions;
   };
+
   static getStatisticByWeek = async (
     transaction_type,
     walletId,
@@ -42,27 +62,28 @@ class TransactionService {
         startTimestamp,
         endTimestamp,
       });
-      const transactionsByDay = {};
+
+      const transactionsByDay = new Map();
       let totalAmount = 0;
       transactions.forEach((transaction) => {
-        const chain = formattedTransactionDate(transaction.createdAt.toDate());
-        if (!transactionsByDay[chain]) {
-          transactionsByDay[chain] = { total: 0, transactions: [] };
+        const date = formattedTransactionDate(transaction.createdAt.toDate());
+        if (!transactionsByDay.has(date)) {
+          transactionsByDay.set(date, { date, total: 0, transactions: [] });
         }
-
-        transactionsByDay[chain].total += transaction.amount;
-        transactionsByDay[chain].transactions.push(transaction);
+        transactionsByDay.get(date).total += transaction.amount;
+        transactionsByDay.get(date).transactions.push(transaction);
         totalAmount += transaction.amount;
       });
 
       return {
         totalAmount,
-        transactionsByDay,
+        transactionsByDay: Array.from(transactionsByDay.values()),
       };
     } catch (error) {
       throw new ErrorHandler(error.message, 500);
     }
   };
+
   static getStatisticByMonth = async (
     transaction_type,
     walletId,
@@ -77,33 +98,39 @@ class TransactionService {
         startTimestamp,
         endTimestamp,
       });
-      const transactionsByMonth = {};
+
+      const transactionsByMonth = new Map();
       let totalAmount = 0;
 
       transactions.forEach((transaction) => {
-        const monthKey = transaction.createdAt.toDate().getMonth() + 1;
-        if (!transactionsByMonth[monthKey]) {
-          transactionsByMonth[monthKey] = { total: 0, transactions: [] };
+        const date = transaction.createdAt.toDate();
+        const monthKey = `${date.getFullYear()}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}`;
+        if (!transactionsByMonth.has(monthKey)) {
+          transactionsByMonth.set(monthKey, {
+            month: monthKey,
+            total: 0,
+            transactions: [],
+          });
         }
-        transactionsByMonth[monthKey].total += transaction.amount;
-        transactionsByMonth[monthKey].transactions.push(transaction);
+        transactionsByMonth.get(monthKey).total += transaction.amount;
+        transactionsByMonth.get(monthKey).transactions.push(transaction);
         totalAmount += transaction.amount;
       });
-
       return {
         totalAmount,
-        transactionsByMonth,
+        transactionsByMonth: Array.from(transactionsByMonth.values()),
       };
     } catch (error) {
       throw new ErrorHandler(error.message, 500);
     }
   };
+
   static getStatisticByYear = async (
     transaction_type,
     walletId,
-    customerId,
-    startYear,
-    endYear
+    customerId
   ) => {
     try {
       const { startTimestamp, endTimestamp } = getDateRange("year");
@@ -114,27 +141,35 @@ class TransactionService {
         startTimestamp,
         endTimestamp,
       });
-      const transactionsByYear = {};
+
+      const transactionsByYear = new Map();
       let totalAmount = 0;
 
       transactions.forEach((transaction) => {
         const yearKey = transaction.createdAt.toDate().getFullYear().toString();
-        if (!transactionsByYear[yearKey]) {
-          transactionsByYear[yearKey] = { total: 0, transactions: [] };
+
+        if (!transactionsByYear.has(yearKey)) {
+          transactionsByYear.set(yearKey, {
+            year: yearKey,
+            total: 0,
+            transactions: [],
+          });
         }
-        transactionsByYear[yearKey].total += transaction.amount;
-        transactionsByYear[yearKey].transactions.push(transaction);
+
+        transactionsByYear.get(yearKey).total += transaction.amount;
+        transactionsByYear.get(yearKey).transactions.push(transaction);
         totalAmount += transaction.amount;
       });
 
       return {
         totalAmount,
-        transactionsByYear,
+        transactionsByYear: Array.from(transactionsByYear.values()),
       };
     } catch (error) {
       throw new ErrorHandler(error.message, 500);
     }
   };
+
   static getTransactionsByWalletAndType = async ({
     walletId,
     customerId,
@@ -161,8 +196,9 @@ class TransactionService {
   };
 
   static deleteTransaction = async (transactionId) => {
+    const transaction = await this.getTransactionById(transactionId);
     await db.collection("transactions").doc(transactionId).delete();
-    return await this.getTransactionById(transactionId);
+    return transaction;
   };
 
   static getTransactionsByDateRange = async (
