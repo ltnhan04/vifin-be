@@ -1,9 +1,10 @@
 const WalletService = require("../services/wallet.service");
 const ResponseHandler = require("../utils/response.handler");
 
-const getWallets = async (_req, res, next) => {
+const getWallets = async (req, res, next) => {
   try {
-    const wallets = await WalletService.getWallets();
+    const customerId = req.customer.user_id;
+    const wallets = await WalletService.getWallets(customerId);
     return ResponseHandler.sendSuccess(
       res,
       wallets,

@@ -3,9 +3,13 @@ const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
 
 class WalletService {
-  static getWallets = async () => {
+  static getWallets = async (customerId) => {
+    console.log(customerId);
     const walletData = [];
-    const querySnap = await db.collection("wallets").get();
+    const querySnap = await db
+      .collection("wallets")
+      .where("customer_id", "==", customerId)
+      .get();
     querySnap.forEach((docSnap) =>
       walletData.push({ ...docSnap.data(), _id: docSnap.id })
     );
