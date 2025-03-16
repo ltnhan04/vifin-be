@@ -96,10 +96,11 @@ const yearlyTransaction = async (req, res, next) => {
 };
 const recentTransactions = async (req, res, next) => {
   try {
-    const { walletId, limit } = req.query;
+    const { walletId, limit, type } = req.query;
     const transactions = await TransactionService.getRecentTransactions(
       walletId,
-      Number(limit)
+      type.replace(/"/g, ""),
+      limit
     );
     return ResponseHandler.sendSuccess(
       res,

@@ -12,12 +12,13 @@ class TransactionService {
     }
     return { ...docSnap.data(), _id: docSnap.id };
   };
-  static getRecentTransactions = async (walletId, limit) => {
+  static getRecentTransactions = async (walletId, type, limit) => {
     const snapShot = await db
       .collection("transactions")
       .where("wallet_id", "==", walletId)
+      .where("transaction_type", "==", type)
       .orderBy("createdAt", "desc")
-      .limit(limit)
+      .limit(Number(limit))
       .get();
 
     if (snapShot.empty) {
@@ -26,6 +27,7 @@ class TransactionService {
     const transactions = await Promise.all(
       snapShot.docs.map(async (doc) => {
         const transaction = { ...doc.data(), _id: doc.id };
+        console.log(transaction);
         const walletSnap = await db
           .collection("wallets")
           .doc(transaction.wallet_id)

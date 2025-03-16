@@ -8,11 +8,27 @@ const {
   getWallet,
 } = require("../controllers/wallet.controller");
 const { uploadImage } = require("../utils/upload");
+const {
+  validateCreateWallet,
+  validateUpdateWallet,
+} = require("../middlewares/validations/validate.wallet");
 
 router.get("/", authenticateToken, getWallets);
 router.get("/:id", authenticateToken, getWallet);
-router.post("/", authenticateToken, uploadImage, createWallet);
-router.put("/:id", authenticateToken, uploadImage, updateWallet);
+router.post(
+  "/",
+  authenticateToken,
+  validateCreateWallet,
+  uploadImage,
+  createWallet
+);
+router.put(
+  "/:id",
+  authenticateToken,
+  validateUpdateWallet,
+  uploadImage,
+  updateWallet
+);
 router.delete("/:id", authenticateToken, deleteWallet);
 
 module.exports = router;
