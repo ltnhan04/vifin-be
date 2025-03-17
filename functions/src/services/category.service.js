@@ -39,6 +39,13 @@ class CategoryService {
     return categoryDoc.data();
   };
 
+  static filterCategoryName(data) {
+    const getNames = (category) => {
+      return [category.name, ...(category.children || []).flatMap(getNames)];
+    };
+    return data.flatMap(getNames);
+  }
+
   static addCategory = async ({
     name,
     symbol,
