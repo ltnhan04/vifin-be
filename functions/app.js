@@ -10,6 +10,7 @@ const walletRoutes = require("./src/routes/wallet.routes");
 const categoriesRoutes = require("./src/routes/category.routes");
 const budgetRoutes = require("./src/routes/budget.routes");
 const transactionRoutes = require("./src/routes/transaction.routes");
+const billRoutes = require("./src/routes/bill.routes");
 
 dotenv.config();
 const app = express();
@@ -24,6 +25,7 @@ app.use("/v1/wallet", walletRoutes);
 app.use("/v1/category", categoriesRoutes);
 app.use("/v1/budget", budgetRoutes);
 app.use("/v1/transactions", transactionRoutes);
+app.use("/v1/bill", billRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello World!");
