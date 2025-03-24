@@ -27,7 +27,6 @@ class TransactionService {
     const transactions = await Promise.all(
       snapShot.docs.map(async (doc) => {
         const transaction = { ...doc.data(), _id: doc.id };
-        console.log(transaction);
         const walletSnap = await db
           .collection("wallets")
           .doc(transaction.wallet_id)
@@ -67,15 +66,37 @@ class TransactionService {
 
       const transactionsByDay = new Map();
       let totalAmount = 0;
-      transactions.forEach((transaction) => {
+
+      for (let transaction of transactions) {
         const date = formattedTransactionDate(transaction.createdAt.toDate());
+
+        const categorySnap = await db
+          .collection("categories")
+          .doc(transaction.category_id)
+          .get();
+        transaction.category = categorySnap.exists
+          ? { _id: categorySnap.id, ...categorySnap.data() }
+          : null;
+
+        const walletSnap = await db
+          .collection("wallets")
+          .doc(transaction.wallet_id)
+          .get();
+        transaction.wallet = walletSnap.exists
+          ? { _id: walletSnap.id, ...walletSnap.data() }
+          : null;
+
+        delete transaction.category_id;
+        delete transaction.wallet_id;
+
         if (!transactionsByDay.has(date)) {
           transactionsByDay.set(date, { date, total: 0, transactions: [] });
         }
+
         transactionsByDay.get(date).total += transaction.amount;
         transactionsByDay.get(date).transactions.push(transaction);
         totalAmount += transaction.amount;
-      });
+      }
 
       return {
         totalAmount,
@@ -104,11 +125,31 @@ class TransactionService {
       const transactionsByMonth = new Map();
       let totalAmount = 0;
 
-      transactions.forEach((transaction) => {
+      for (let transaction of transactions) {
         const date = transaction.createdAt.toDate();
         const monthKey = `${date.getFullYear()}-${String(
           date.getMonth() + 1
         ).padStart(2, "0")}`;
+
+        const categorySnap = await db
+          .collection("categories")
+          .doc(transaction.category_id)
+          .get();
+        transaction.category = categorySnap.exists
+          ? { _id: categorySnap.id, ...categorySnap.data() }
+          : null;
+
+        const walletSnap = await db
+          .collection("wallets")
+          .doc(transaction.wallet_id)
+          .get();
+        transaction.wallet = walletSnap.exists
+          ? { _id: walletSnap.id, ...walletSnap.data() }
+          : null;
+
+        delete transaction.category_id;
+        delete transaction.wallet_id;
+
         if (!transactionsByMonth.has(monthKey)) {
           transactionsByMonth.set(monthKey, {
             month: monthKey,
@@ -116,10 +157,12 @@ class TransactionService {
             transactions: [],
           });
         }
+
         transactionsByMonth.get(monthKey).total += transaction.amount;
         transactionsByMonth.get(monthKey).transactions.push(transaction);
         totalAmount += transaction.amount;
-      });
+      }
+
       return {
         totalAmount,
         transactionsByMonth: Array.from(transactionsByMonth.values()),
@@ -147,8 +190,27 @@ class TransactionService {
       const transactionsByYear = new Map();
       let totalAmount = 0;
 
-      transactions.forEach((transaction) => {
+      for (let transaction of transactions) {
         const yearKey = transaction.createdAt.toDate().getFullYear().toString();
+
+        const categorySnap = await db
+          .collection("categories")
+          .doc(transaction.category_id)
+          .get();
+        transaction.category = categorySnap.exists
+          ? { _id: categorySnap.id, ...categorySnap.data() }
+          : null;
+
+        const walletSnap = await db
+          .collection("wallets")
+          .doc(transaction.wallet_id)
+          .get();
+        transaction.wallet = walletSnap.exists
+          ? { _id: walletSnap.id, ...walletSnap.data() }
+          : null;
+
+        delete transaction.category_id;
+        delete transaction.wallet_id;
 
         if (!transactionsByYear.has(yearKey)) {
           transactionsByYear.set(yearKey, {
@@ -161,7 +223,7 @@ class TransactionService {
         transactionsByYear.get(yearKey).total += transaction.amount;
         transactionsByYear.get(yearKey).transactions.push(transaction);
         totalAmount += transaction.amount;
-      });
+      }
 
       return {
         totalAmount,
@@ -199,7 +261,48 @@ class TransactionService {
 
   static deleteTransaction = async (transactionId) => {
     const transaction = await this.getTransactionById(transactionId);
-    await db.collection("transactions").doc(transactionId).delete();
+    if (!transaction) {
+      throw new ErrorHandler("Transaction not found", 404);
+    }
+    const walletRef = db.collection("wallets").doc(transaction.wallet_id);
+    const walletDoc = await walletRef.get();
+    if (!walletDoc.exists) {
+      throw new ErrorHandler("Wallet does not exist", 404);
+    }
+    const walletData = walletDoc.data();
+    let budgetDoc = null;
+    const budgetQuery = await db
+      .collection("budgets")
+      .where("wallet_id", "==", transaction.wallet_id)
+      .where("category_id", "==", transaction.category_id)
+      .get();
+
+    if (!budgetQuery.empty && transaction.transaction_type === "expense") {
+      budgetDoc = budgetQuery.docs[0];
+    }
+    await db.runTransaction(async (t) => {
+      const updatedWalletAmount = await this.calculateBalance(
+        transaction.transaction_type === "expense" ? "income" : "expense",
+        walletData.amount,
+        transaction.amount
+      );
+
+      t.update(walletRef, {
+        amount: updatedWalletAmount,
+        updatedAt: new Date(),
+      });
+      if (budgetDoc) {
+        const budgetRef = db.collection("budgets").doc(budgetDoc.id);
+        const budgetData = budgetDoc.data();
+        const updatedUsage = Math.max(
+          0,
+          Number(budgetData.usage || 0) - Number(transaction.amount)
+        );
+        t.update(budgetRef, { usage: updatedUsage, updatedAt: new Date() });
+      }
+      t.delete(db.collection("transactions").doc(transactionId));
+    });
+
     return transaction;
   };
 
@@ -323,7 +426,6 @@ class TransactionService {
         throw new ErrorHandler("Transaction does not exist", 404);
       }
       const oldTransaction = transactionDoc.data();
-
       const walletRef = db.collection("wallets").doc(oldTransaction.wallet_id);
       const walletDoc = await t.get(walletRef);
       if (!walletDoc.exists) {

@@ -29,6 +29,7 @@ class CustomerService {
     const docSnap = await db.collection("customers").doc(uid).get();
     return { ...docSnap.data(), _id: uid };
   };
+  static updateCustomerInfo = async ({}) => {};
 }
 
 module.exports = CustomerService;
