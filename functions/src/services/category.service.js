@@ -1,6 +1,7 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
+const { createCategorySchema } = require("../validations/category.schema")
 
 class CategoryService {
   static getCategories = async (customerId) => {
@@ -53,8 +54,21 @@ class CategoryService {
     createdBy,
     transaction_type,
   }) => {
+    // Validate dữ liệu đầu vào
+    const { error, value } = createCategorySchema.validate(
+      { name, symbol, parent_id, createdBy, transaction_type },
+      { abortEarly: false }
+    );
+
+    if (error) {
+      throw new Error(error.details.map(err => err.message).join(", "));
+    }
     const categoryRef = db.collection("categories").doc();
-    const imageUrl = await createImageUrl(symbol);
+    // Xử lý symbol khi bị undefined hoặc null
+    let imageUrl = null;
+    if (symbol) {
+      imageUrl = await createImageUrl(symbol);
+    }
     const categoryData = {
       name,
       symbol: imageUrl,
