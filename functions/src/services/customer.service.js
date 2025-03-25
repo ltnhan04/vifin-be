@@ -1,4 +1,5 @@
 const { db } = require("../configs/firebase.config");
+const { createCustomerSchema } = require("../validations/customer.schema")
 class CustomerService {
   static createNewCustomer = async ({
     avatar,
@@ -9,6 +10,15 @@ class CustomerService {
     provider,
     role = "customer",
   }) => {
+    // Validate dữ liệu đầu vào
+    const { error, value } = createCustomerSchema.validate(
+      { avatar, full_name, gender, email, provider },
+      { abortEarly: false }
+    );
+
+    if (error) {
+      throw new Error(error.details.map(err => err.message).join(", "));
+    }
     const customerData = {
       avatar: avatar || null,
       full_name: full_name,

@@ -1,6 +1,7 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
+const { createWalletSchema, updateWalletSchema} = require("../../src/validations/wallet.schema")
 
 class WalletService {
   static getWallets = async (customerId) => {
@@ -30,10 +31,21 @@ class WalletService {
     currency_unit = "VND",
     amount,
   }) => {
+    // Validate dữ liệu đầu vào
+    const { error, value } = createWalletSchema.validate(
+      { symbol, wallet_name, customer_id, currency_unit, amount },
+      { abortEarly: false }
+    );
+
+    if (error) {
+      throw new Error(error.details.map(err => err.message).join(", "));
+    }
+
     let imageUrl = null;
     if (symbol) {
       imageUrl = await createImageUrl(symbol);
     }
+
     const walletRef = db.collection("wallets").doc();
     const walletData = {
       symbol: imageUrl,
@@ -49,6 +61,11 @@ class WalletService {
   };
 
   static updateWallet = async (id, data) => {
+    const { error } = updateWalletSchema.validate(data);
+    if (error) {
+      throw new ErrorHandler(error.details[0].message, 400);
+    }
+    
     const walletRef = db.collection("wallets").doc(id);
     const walletData = await this.getWallet(id);
     if (!walletData) {
@@ -79,6 +96,9 @@ class WalletService {
   static deleteWallet = async (id) => {
     const walletRef = db.collection("wallets").doc(id);
     const walletData = await this.getWallet(id);
+    if (!walletData) {
+      throw new Error("Wallet not found");
+    }
     if (walletData.symbol) {
       await deleteImageFromStorage(walletData.symbol);
     }
