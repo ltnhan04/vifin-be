@@ -37,7 +37,8 @@ Phân loại hóa đơn:
 Tiền tệ và định dạng số:
 - Nhận diện đơn vị tiền tệ trong hóa đơn (VD: VND, USD, EUR, JPY, ...).
 - Nếu đơn vị là VND hoặc không xác định được, giữ nguyên giá trị.
-- **Nếu đơn vị được biểu diễn bằng ký hiệu "S" hoặc USD, coi đó là USD và chuyển đổi tất cả các giá trị (bao gồm giá sản phẩm và total) sang VND với tỷ giá 1 USD = 25.000 VND.**  
+- **Nếu đơn vị được biểu diễn bằng ký hiệu "S" hoặc USD, coi đó là USD và chuyển đổi tất cả các giá trị (bao gồm giá sản phẩm và total) sang VND với tỷ giá 1 USD = 25.000 VND.** 
+**Nếu đơn vị được biểu diễn bằng ký hiệu "B" hoặc THB, coi đó là Thai Baht(Thái) và chuyển đổi tất cả các giá trị (bao gồm giá sản phẩm và total) sang VND với tỷ giá 1.00 Thai Baht = 759 VND.**  
 - Nếu đơn vị là các ngoại tệ khác (ví dụ: EUR, JPY), chuyển đổi về VND với tỷ giá phù hợp (giả định bạn có kiến thức về tỷ giá hiện tại).
 - **Đảm bảo rằng tất cả các giá trị của "price" và "total" đều được chuyển về số VND theo chuẩn của Việt Nam.** Nghĩa là, sau khi chuyển đổi (nếu cần), chỉ trả về giá trị số (ví dụ: 250000) mà không có ký hiệu tiền tệ, và định dạng số phải tuân theo kiểu số của Việt Nam (không chứa ký hiệu ngoại tệ hay dấu phân cách không cần thiết).
 
@@ -48,6 +49,7 @@ Xử lý các định dạng số:
 ${text}
 """
 Hãy trả về chuỗi JSON phù hợp, không nói thêm gì khác.`;
+
     const response = await googleAI.generateContent(prompt);
     let aiResult = response.response
       .text()
@@ -58,11 +60,28 @@ Hãy trả về chuỗi JSON phù hợp, không nói thêm gì khác.`;
     try {
       receiptData = JSON.parse(aiResult);
     } catch (err) {
-      throw new ErrorHandler("Error parse JSON from AI.", 400);
+      throw new ErrorHandler("Error parsing JSON from AI.", 400);
     }
+
     let { storeName, date, invoiceNumber, items, total, type, category } =
       receiptData;
-    if (!date) date = new Date();
+
+    // Giá trị mặc định cho invoiceNumber và storeName
+    storeName = storeName && storeName.trim() !== "" ? storeName : "N/A";
+    invoiceNumber =
+      invoiceNumber && invoiceNumber.trim() !== "" ? invoiceNumber : "N/A";
+
+    // Chuẩn hóa storeName (loại bỏ tiền tố không mong muốn)
+    storeName = storeName.replace(/^(dịch vụ|cửa hàng)\s+/i, "").trim();
+
+    // Kiểm tra tính hợp lệ của hóa đơn (phải có items và total)
+    if (!items || !Array.isArray(items) || items.length === 0 || !total) {
+      throw new ErrorHandler("Invalid invoice data.", 400);
+    }
+
+    // Nếu ngày không tồn tại, sử dụng ngày hiện tại
+    if (!date) date = new Date().toISOString().split("T")[0];
+
     return { storeName, date, invoiceNumber, items, total, type, category };
   };
 }
