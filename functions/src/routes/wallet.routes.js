@@ -6,6 +6,9 @@ const {
   deleteWallet,
   getWallets,
   getWallet,
+  statisticByWeek,
+  statisticByMonth,
+  statisticByYear,
 } = require("../controllers/wallet.controller");
 const { uploadImage } = require("../utils/upload");
 const {
@@ -13,8 +16,13 @@ const {
   validateUpdateWallet,
 } = require("../middlewares/validations/validate.wallet");
 
+router.get("/weekly", authenticateToken, statisticByWeek);
+router.get("/monthly", authenticateToken, statisticByMonth);
+router.get("/yearly", authenticateToken, statisticByYear);
+
 router.get("/", authenticateToken, getWallets);
 router.get("/:id", authenticateToken, getWallet);
+
 router.post(
   "/",
   authenticateToken,

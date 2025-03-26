@@ -10,6 +10,7 @@ const createTransactionSchema = Joi.object({
     .insensitive()
     .required(),
   note: Joi.string().optional().allow(null, ""),
+  createdAt: Joi.string().optional(),
 });
 
 const updateTransactionSchema = Joi.object({

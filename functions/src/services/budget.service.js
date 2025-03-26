@@ -1,4 +1,4 @@
-const { db } = require("../configs/firebase.config");
+const { db, Timestamp } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const CategoryService = require("../services/category.service");
 const WalletService = require("../services/wallet.service");
@@ -73,16 +73,17 @@ class BudgetService {
   };
   static updateBudget = async (budgetId, data) => {
     if (data.startDate) {
-      data.startDate = new Date(data.startDate);
+      data.startDate = Timestamp.fromDate(new Date(data.startDate));
     }
     if (data.dueDate) {
-      data.dueDate = new Date(data.dueDate);
+      data.dueDate = Timestamp.fromDate(new Date(data.dueDate));
     }
     const budgetData = {
       ...data,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
     };
     await db.collection("budgets").doc(budgetId).update(budgetData);
+
     const updatedBudget = await this.getBudgetById(budgetId);
     return { ...updatedBudget, _id: budgetId };
   };
@@ -100,7 +101,11 @@ class BudgetService {
   static checkBudgetCompletion = async (budget) => {
     const now = new Date();
     const usage = await this.getBudgetUsage(budget._id);
-    const dueDate = new Date(budget.dueDate);
+    const dueDate =
+      budget.dueDate && budget.dueDate.toDate
+        ? budget.dueDate.toDate()
+        : new Date(budget.dueDate);
+
     if (now > dueDate || usage >= budget.amount || budget.is_completed) {
       if (!budget.is_completed) {
         await this.updateBudget(budget._id, { is_completed: true });
@@ -112,8 +117,12 @@ class BudgetService {
   static notifyBudgetOverLimit = async () => {};
   static handleRepeatBudget = async (budget) => {
     const currentDate = new Date();
-    const dueDate = new Date(budget.dueDate);
-    if (budget.is_repeated && currentDate >= budget.dueDate) {
+    const dueDate =
+      budget.dueDate && budget.dueDate.toDate
+        ? budget.dueDate.toDate()
+        : new Date(budget.dueDate);
+
+    if (budget.is_repeated && currentDate >= dueDate) {
       const newDueDate = this.autoRenewBudget(
         budget.repeat_type,
         budget.startDate,
@@ -134,8 +143,15 @@ class BudgetService {
     return null;
   };
   static autoRenewBudget = (repeat_type, startDate, dueDate) => {
-    const startCustomDate = new Date(startDate).getDate();
-    const newDueDate = new Date(dueDate);
+    const startCustomDate =
+      startDate && startDate.toDate
+        ? startDate.toDate().getDate()
+        : new Date(startDate).getDate();
+    const newDueDate =
+      dueDate && dueDate.toDate
+        ? new Date(dueDate.toDate())
+        : new Date(dueDate);
+
     switch (repeat_type) {
       case "weekly": {
         return newDueDate.setDate(newDueDate.getDate() + 7);

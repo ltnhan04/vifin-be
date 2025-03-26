@@ -82,10 +82,69 @@ const deleteWallet = async (req, res, next) => {
   }
 };
 
+const statisticByWeek = async (req, res, next) => {
+  try {
+    const customerId = req.customer.user_id;
+    const { walletId } = req.query;
+    const weekly = await WalletService.getStatisticByWeek(
+      walletId.replace(/"/g, ""),
+      customerId
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      weekly,
+      200,
+      "Get Weekly Statistic Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+const statisticByMonth = async (req, res, next) => {
+  try {
+    const customerId = req.customer.user_id;
+    const { walletId } = req.query;
+    const monthly = await WalletService.getStatisticByMonth(
+      walletId.replace(/"/g, ""),
+      customerId
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      monthly,
+      200,
+      "Get Monthly Statistic Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const statisticByYear = async (req, res, next) => {
+  try {
+    const customerId = req.customer.user_id;
+    const { walletId } = req.query;
+    const yearly = await WalletService.getStatisticByYear(
+      walletId.replace(/"/g, ""),
+      customerId
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      yearly,
+      200,
+      "Get Yearly Statistic Successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createWallet,
   updateWallet,
   deleteWallet,
   getWallets,
   getWallet,
+  statisticByWeek,
+  statisticByMonth,
+  statisticByYear,
 };
