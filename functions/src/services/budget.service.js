@@ -2,6 +2,7 @@ const { db, Timestamp } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const CategoryService = require("../services/category.service");
 const WalletService = require("../services/wallet.service");
+const { createBudgetSchema } = require("../validations/budget.schema")
 class BudgetService {
   static getBudgets = async () => {
     const budgets = [];
@@ -41,7 +42,6 @@ class BudgetService {
 
     return await Promise.all(budgetPromises);
   };
-
   static createBudget = async ({
     category_id,
     wallet_id,
@@ -52,6 +52,24 @@ class BudgetService {
     is_repeated,
     is_completed,
   }) => {
+    // Validate dữ liệu đầu vào
+    const { error, value } = createBudgetSchema.validate(
+      {
+        category_id,
+        wallet_id,
+        startDate,
+        dueDate,
+        amount,
+        repeat_type,
+        is_repeated,
+        is_completed,
+      },
+      { abortEarly: false }
+    );
+
+    if (error) {
+      throw new Error(error.details.map(err => err.message).join(", "));
+    }
     const budgetRef = db.collection("budgets").doc().id;
     const budgetData = {
       category_id: category_id,
@@ -72,6 +90,17 @@ class BudgetService {
     return { ...budgetData, _id: budgetRef };
   };
   static updateBudget = async (budgetId, data) => {
+    // 🔥 Kiểm tra budget có tồn tại trước khi update
+    const existingBudget = await this.getBudgetById(budgetId);
+    if (!existingBudget) {
+      throw new ErrorHandler("Budget not found", 404);
+    }
+
+    // 🔥 Validate dữ liệu đầu vào
+    const { error } = updateWalletSchema.validate(data);
+    if (error) {
+      throw new ErrorHandler(error.details[0].message, 400);
+    }
     if (data.startDate) {
       data.startDate = Timestamp.fromDate(new Date(data.startDate));
     }
@@ -97,7 +126,6 @@ class BudgetService {
     const budgetDoc = await db.collection("budgets").doc(budgetId).get();
     return budgetDoc.data().usage;
   };
-
   static checkBudgetCompletion = async (budget) => {
     const now = new Date();
     const usage = await this.getBudgetUsage(budget._id);
@@ -114,7 +142,7 @@ class BudgetService {
     }
     return false;
   };
-  static notifyBudgetOverLimit = async () => {};
+  static notifyBudgetOverLimit = async () => { };
   static handleRepeatBudget = async (budget) => {
     const currentDate = new Date();
     const dueDate =
