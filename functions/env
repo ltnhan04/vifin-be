@@ -1,4 +1,0 @@
-APP_PORT = 8000
-DB_URL=https://vifin-app-default-rtdb.asia-southeast1.firebasedatabase.app
-NODE_ENV=development
-GEMINI_API_KEY=AIzaSyBPotpNDTQJ77IuEidDynbU10VXGRraspA

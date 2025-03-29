@@ -1,7 +1,7 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
-const { createCategorySchema } = require("../validations/category.schema")
+const { createCategorySchema } = require("../validations/category.schema");
 
 class CategoryService {
   static getCategories = async (customerId) => {
@@ -40,6 +40,24 @@ class CategoryService {
     return categoryDoc.data();
   };
 
+  static searchCategoryByName = async (name) => {
+    const categoryRef = db.collection("categories");
+    const querySnapshot = await categoryRef
+      .orderBy("name")
+      .startAt(name)
+      .endAt(name + "\uf8ff")
+      .get();
+    if (querySnapshot.empty) {
+      return [];
+    }
+    let categories = [];
+    querySnapshot.forEach((doc) => {
+      categories.push({ _id: doc.id, ...doc.data() });
+    });
+
+    return categories;
+  };
+
   static filterCategoryName(data) {
     const getNames = (category) => {
       return [category.name, ...(category.children || []).flatMap(getNames)];
@@ -54,17 +72,15 @@ class CategoryService {
     createdBy,
     transaction_type,
   }) => {
-    // Validate dữ liệu đầu vào
     const { error, value } = createCategorySchema.validate(
       { name, symbol, parent_id, createdBy, transaction_type },
       { abortEarly: false }
     );
 
     if (error) {
-      throw new Error(error.details.map(err => err.message).join(", "));
+      throw new Error(error.details.map((err) => err.message).join(", "));
     }
     const categoryRef = db.collection("categories").doc();
-    // Xử lý symbol khi bị undefined hoặc null
     let imageUrl = null;
     if (symbol) {
       imageUrl = await createImageUrl(symbol);

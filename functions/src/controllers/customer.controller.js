@@ -32,5 +32,21 @@ const getCustomers = async (req, res, next) => {
     next(error);
   }
 };
+const updateCustomer = async (req, res, next) => {
+  try {
+    const updatedCustomer = await CustomerService.updateCustomerInfo(
+      req.params.id,
+      { ...req.body, avatar: req.files[0] }
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      updatedCustomer,
+      200,
+      "Updated customer info successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
-module.exports = { createCustomer, getCustomers };
+module.exports = { createCustomer, getCustomers, updateCustomer };

@@ -1,7 +1,8 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
-const { createWalletSchema, updateWalletSchema} = require("../../src/validations/wallet.schema")
+const { getDateRange, formattedTransactionDate } = require("../utils/date");
+const TransactionService = require("../services/transaction.service");
 
 class WalletService {
   static getWallets = async (customerId) => {
@@ -23,7 +24,6 @@ class WalletService {
     }
     return walletDoc.data();
   };
-
   static createWallet = async ({
     symbol,
     wallet_name,
@@ -38,7 +38,7 @@ class WalletService {
     );
 
     if (error) {
-      throw new Error(error.details.map(err => err.message).join(", "));
+      throw new Error(error.details.map((err) => err.message).join(", "));
     }
 
     let imageUrl = null;
@@ -59,13 +59,12 @@ class WalletService {
     await walletRef.set(walletData);
     return { ...walletData, _id: walletRef.id };
   };
-
   static updateWallet = async (id, data) => {
     const { error } = updateWalletSchema.validate(data);
     if (error) {
       throw new ErrorHandler(error.details[0].message, 400);
     }
-    
+
     const walletRef = db.collection("wallets").doc(id);
     const walletData = await this.getWallet(id);
     if (!walletData) {
@@ -92,7 +91,6 @@ class WalletService {
 
     return { ...updatedWallet, _id: id };
   };
-
   static deleteWallet = async (id) => {
     const walletRef = db.collection("wallets").doc(id);
     const walletData = await this.getWallet(id);
@@ -126,6 +124,164 @@ class WalletService {
     );
 
     return walletData;
+  };
+  static getTransactionsByWalletAndType = async ({
+    walletId,
+    customerId,
+    startTimestamp,
+    endTimestamp,
+  }) => {
+    const transactions = [];
+    const querySnap = await db
+      .collection("transactions")
+      .where("customer_id", "==", customerId)
+      .where("wallet_id", "==", walletId)
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<=", endTimestamp)
+      .orderBy("createdAt", "asc")
+      .get();
+
+    querySnap.forEach((docSnap) =>
+      transactions.push({ ...docSnap.data(), _id: docSnap.id })
+    );
+
+    return transactions;
+  };
+  static getStatisticByWeek = async (walletId, customerId) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("week");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        startTimestamp,
+        endTimestamp,
+      });
+      const transactionsByDay = new Map();
+      let totalIncome = 0;
+      let totalExpense = 0;
+      for (let transaction of transactions) {
+        const date = formattedTransactionDate(transaction.createdAt.toDate());
+        if (!transactionsByDay.has(date)) {
+          transactionsByDay.set(date, {
+            date,
+            totalIncome: 0,
+            totalExpense: 0,
+            transactions: [],
+          });
+        }
+        if (transaction.transaction_type === "income") {
+          transactionsByDay.get(date).totalIncome += transaction.amount;
+          totalIncome += transaction.amount;
+        } else if (transaction.transaction_type === "expense") {
+          transactionsByDay.get(date).totalExpense += transaction.amount;
+          totalExpense += transaction.amount;
+        }
+        transactionsByDay.get(date).transactions.push(transaction);
+      }
+
+      return {
+        totalIncome,
+        totalExpense,
+        transactionsByDay: Array.from(transactionsByDay.values()),
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
+  };
+  static getStatisticByMonth = async (walletId, customerId) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("month");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        startTimestamp,
+        endTimestamp,
+      });
+
+      const transactionsByMonth = new Map();
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      for (let transaction of transactions) {
+        const date = transaction.createdAt.toDate();
+        const monthKey = `${date.getFullYear()}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        if (!transactionsByMonth.has(monthKey)) {
+          transactionsByMonth.set(monthKey, {
+            month: monthKey,
+            totalIncome: 0,
+            totalExpense: 0,
+            transactions: [],
+          });
+        }
+
+        if (transaction.transaction_type === "income") {
+          transactionsByMonth.get(monthKey).totalIncome += transaction.amount;
+          totalIncome += transaction.amount;
+        } else if (transaction.transaction_type === "expense") {
+          transactionsByMonth.get(monthKey).totalExpense += transaction.amount;
+          totalExpense += transaction.amount;
+        }
+
+        transactionsByMonth.get(monthKey).transactions.push(transaction);
+      }
+
+      return {
+        totalIncome,
+        totalExpense,
+        transactionsByMonth: Array.from(transactionsByMonth.values()),
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
+  };
+  static getStatisticByYear = async (walletId, customerId) => {
+    try {
+      const { startTimestamp, endTimestamp } = getDateRange("year");
+      const transactions = await this.getTransactionsByWalletAndType({
+        walletId,
+        customerId,
+        startTimestamp,
+        endTimestamp,
+      });
+
+      const transactionsByYear = new Map();
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      for (let transaction of transactions) {
+        const yearKey = transaction.createdAt.toDate().getFullYear().toString();
+
+        if (!transactionsByYear.has(yearKey)) {
+          transactionsByYear.set(yearKey, {
+            year: yearKey,
+            totalIncome: 0,
+            totalExpense: 0,
+            transactions: [],
+          });
+        }
+
+        if (transaction.transaction_type === "income") {
+          transactionsByYear.get(yearKey).totalIncome += transaction.amount;
+          totalIncome += transaction.amount;
+        } else if (transaction.transaction_type === "expense") {
+          transactionsByYear.get(yearKey).totalExpense += transaction.amount;
+          totalExpense += transaction.amount;
+        }
+
+        transactionsByYear.get(yearKey).transactions.push(transaction);
+      }
+
+      return {
+        totalIncome,
+        totalExpense,
+        transactionsByYear: Array.from(transactionsByYear.values()),
+      };
+    } catch (error) {
+      throw new ErrorHandler(error.message, 500);
+    }
   };
 }
 
