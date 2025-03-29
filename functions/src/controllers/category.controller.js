@@ -30,6 +30,22 @@ const getCategory = async (req, res, next) => {
     next(error);
   }
 };
+const searchCategory = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    const foundCategories = await CategoryService.searchCategoryByName(
+      q.replace(/"/g, "")
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      foundCategories,
+      200,
+      "Search category by name successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 const addCategory = async (req, res, next) => {
   try {
     const newCategory = await CategoryService.addCategory({
@@ -87,4 +103,5 @@ module.exports = {
   deletedCategory,
   getCategories,
   getCategory,
+  searchCategory,
 };

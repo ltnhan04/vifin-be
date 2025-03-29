@@ -4,13 +4,17 @@ const createTransactionSchema = Joi.object({
   amount: Joi.number().min(0).required().messages({
     "number.base": "Expected number, received string",
     "number.min": "Amount must be a positive number",
-    "any.required": "amount is required"
+    "any.required": "amount is required",
   }),
   category_id: Joi.string().required(),
   customer_id: Joi.alternatives().try(Joi.string(), Joi.valid(null)), // ✅ Hỗ trợ null
   wallet_id: Joi.string().required(),
-  transaction_type: Joi.string().valid("expense", "income").insensitive().required(),
-  note: Joi.string().allow(null, ""), // ✅ Hỗ trợ cả null và chuỗi rỗng
+  transaction_type: Joi.string()
+    .valid("expense", "income")
+    .insensitive()
+    .required(),
+  note: Joi.string().optional().allow(null, ""),
+  createdAt: Joi.string().optional(),
 });
 
 const updateTransactionSchema = Joi.object({
