@@ -3,9 +3,12 @@ const { authenticateToken } = require("../middlewares/auth.middleware");
 const {
   createCustomer,
   getCustomers,
+  updateCustomer,
 } = require("../controllers/customer.controller");
+const { uploadImage } = require("../utils/upload");
 
-router.post("/", authenticateToken, createCustomer);
 router.get("/:id", authenticateToken, getCustomers);
+router.post("/", authenticateToken, createCustomer);
+router.put("/:id", authenticateToken, uploadImage, updateCustomer);
 
 module.exports = router;
