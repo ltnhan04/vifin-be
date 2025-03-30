@@ -15,18 +15,21 @@ const createWalletSchema = Joi.object({
     "string.max": "Wallet name must not exceed 50 characters",
     "any.required": "wallet_name is required",
   }),
-  symbol: Joi.string()
-    .optional()
-    .allow(null, "")
-    .custom((value, helpers) => {
-      if (value && !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/.test(value)) {
-        return helpers.error("string.uri");
-      }
-      return value;
-    })
-    .messages({
-      "string.uri": "Symbol must be a valid image URL (jpg, png, gif, jpeg)",
-    }),
+  // customer_id: Joi.string().required().messages({
+  //   "any.required": "customer_id is required",
+  // }),
+  // symbol: Joi.string()
+  //   .optional()
+  //   .allow(null, "")
+  //   .custom((value, helpers) => {
+  //     if (value && !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/.test(value)) {
+  //       return helpers.error("string.uri");
+  //     }
+  //     return value;
+  //   })
+  //   .messages({
+  //     "string.uri": "Symbol must be a valid image URL (jpg, png, gif, jpeg)",
+  //   }),
 }).unknown(true);
 
 const updateWalletSchema = Joi.object({

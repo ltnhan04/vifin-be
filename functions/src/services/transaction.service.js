@@ -1,6 +1,8 @@
 const { db } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
-const { createTransactionSchema } = require("../validations/transaction.schema")
+const {
+  createTransactionSchema,
+} = require("../validations/transaction.schema");
 const { getDateRange, formattedTransactionDate } = require("../utils/date");
 class TransactionService {
   static getTransactionById = async (transactionId) => {
@@ -358,14 +360,6 @@ class TransactionService {
     category_id,
     note,
   }) => {
-    const { error, value } = createTransactionSchema.validate(
-      { amount, customer_id, transaction_type, wallet_id, category_id, note },
-      { abortEarly: false }
-    );
-
-    if (error) {
-      throw new Error(error.details.map(err => err.message).join(", "));
-    }
     const transactionRef = db.collection("transactions").doc();
     const walletRef = db.collection("wallets").doc(wallet_id);
     const budgetRef = await this.handleUpdateBudgetAmount(
