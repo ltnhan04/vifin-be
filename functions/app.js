@@ -28,15 +28,12 @@ app.use("/v1/transactions", transactionRoutes);
 app.use("/v1/bill", billRoutes);
 
 app.get("/", (_, res) => {
-  res.send("Hello World!");
+  res.send("Hello World! - UPDATED");
 });
 app.use((error, _req, res, _next) => {
   const statusCode = error.statusCode || 500;
   const message = error.message || "Internal Server Error";
   res.status(statusCode).json({ message });
 });
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-});
+
 module.exports = app;
