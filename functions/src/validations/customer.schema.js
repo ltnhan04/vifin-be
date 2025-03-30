@@ -11,13 +11,13 @@ const createCustomerSchema = Joi.object({
     .required(),
   gender: Joi.string().valid("male", "female").default("male"),
   email: Joi.string()
-  .email()
-  .pattern(/@gmail\.com$/)
-  .required()
-  .messages({
-    "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
-  }),
-  provider: Joi.string().valid("google").optional().allow(null),
+    .email()
+    .pattern(/@gmail\.com$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
+    }),
+  provider: Joi.string().valid("google.com", "password").optional(),
   role: Joi.string().default("customer"),
 }).min(1);
 
@@ -25,4 +25,4 @@ const updateProfileSchema = Joi.object({
   name: Joi.string().min(2).max(50),
   gender: Joi.string().valid("male", "female"),
 }).min(1);
-module.exports = {updateProfileSchema, createCustomerSchema};
+module.exports = { updateProfileSchema, createCustomerSchema };

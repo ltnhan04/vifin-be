@@ -7,7 +7,7 @@ const {
 } = require("../controllers/customer.controller");
 const { uploadImage } = require("../utils/upload");
 
-router.get("/:id", authenticateToken, getCustomers);
+router.get("/:id", getCustomers);
 router.post("/", authenticateToken, createCustomer);
 router.put("/:id", authenticateToken, uploadImage, updateCustomer);
 
