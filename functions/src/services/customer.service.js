@@ -1,6 +1,6 @@
 const { db } = require("../configs/firebase.config");
 const { createCustomerSchema } = require("../validations/customer.schema");
-const { ErrorHandler } = require("../middlewares/error.handler");
+const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
 class CustomerService {
   static createNewCustomer = async ({
