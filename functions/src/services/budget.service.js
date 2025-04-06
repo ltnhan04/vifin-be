@@ -2,6 +2,9 @@ const { db, Timestamp } = require("../configs/firebase.config");
 const ErrorHandler = require("../middlewares/error.handler");
 const CategoryService = require("../services/category.service");
 const WalletService = require("../services/wallet.service");
+const NotificationService = require("./notification.service");
+const CustomerService = require("./customer.service");
+
 class BudgetService {
   static getBudgets = async () => {
     const budgets = [];
@@ -65,9 +68,7 @@ class BudgetService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
     await db.collection("budgets").doc(budgetRef).set(budgetData);
-
     return { ...budgetData, _id: budgetRef };
   };
   static updateBudget = async (budgetId, data) => {
@@ -75,7 +76,6 @@ class BudgetService {
     if (!existingBudget) {
       throw new ErrorHandler("Budget not found", 404);
     }
-
     if (data.startDate) {
       data.startDate = Timestamp.fromDate(new Date(data.startDate));
     }
@@ -87,7 +87,6 @@ class BudgetService {
       updatedAt: Timestamp.now(),
     };
     await db.collection("budgets").doc(budgetId).update(budgetData);
-
     const updatedBudget = await this.getBudgetById(budgetId);
     return { ...updatedBudget, _id: budgetId };
   };
@@ -117,15 +116,40 @@ class BudgetService {
     }
     return false;
   };
-  static notifyBudgetOverLimit = async () => {};
+  static notifyBudgetOverLimit = async (budget) => {
+    try {
+      const customer = await CustomerService.getCustomer(budget.customer_id);
+      const category = await CategoryService.getCategory(budget.category_id);
+
+      if (customer.push_token) {
+        const title = "Oops! Budget Limit Reached";
+        const body = `You've gone over your budget for "${category.name}". You've spent ${budget.usage} out of ${budget.amount}. Let's get back on track!`;
+
+        await NotificationService.sendPushNotification(
+          [customer.push_token],
+          title,
+          body,
+          {
+            type: "budget_over_limit",
+            budget_id: budget._id,
+            category_id: budget.category_id,
+            wallet_id: budget.wallet_id,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error sending budget notification:", error);
+    }
+  };
   static handleRepeatBudget = async (budget) => {
     const currentDate = new Date();
     const dueDate =
       budget.dueDate && budget.dueDate.toDate
         ? budget.dueDate.toDate()
         : new Date(budget.dueDate);
-
-    if (budget.is_repeated && currentDate >= dueDate) {
+    const usage = await this.getBudgetUsage(budget._id);
+    const isCompleted = usage >= budget.amount;
+    if (budget.is_repeated && (currentDate >= dueDate || isCompleted)) {
       const newDueDate = this.autoRenewBudget(
         budget.repeat_type,
         budget.startDate,
@@ -141,7 +165,7 @@ class BudgetService {
         is_repeated: budget.is_repeated,
         is_completed: false,
       };
-      return await this.createBudget(newBudgetData);
+      await this.createBudget(newBudgetData);
     }
     return null;
   };

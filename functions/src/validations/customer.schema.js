@@ -9,7 +9,7 @@ const createCustomerSchema = Joi.object({
     .message("full_name must be at most 50 characters")
     .trim()
     .required(),
-  gender: Joi.string().valid("male", "female").default("male"),
+  gender: Joi.string().valid("male", "female", "other").default("male"),
   email: Joi.string()
     .email()
     .pattern(/@gmail\.com$/)
@@ -19,6 +19,7 @@ const createCustomerSchema = Joi.object({
     }),
   provider: Joi.string().valid("google.com", "password").optional(),
   role: Joi.string().default("customer"),
+  push_token: Joi.string().allow(null),
 }).min(1);
 
 const updateProfileSchema = Joi.object({

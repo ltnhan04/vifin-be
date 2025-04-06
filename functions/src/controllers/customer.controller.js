@@ -48,5 +48,27 @@ const updateCustomer = async (req, res, next) => {
     next(error);
   }
 };
-
-module.exports = { createCustomer, getCustomers, updateCustomer };
+const updatePushToken = async (req, res, next) => {
+  try {
+    const uid = req.customer.user_id;
+    const pushToken = req.body;
+    const updatedCustomer = await CustomerService.updatePushToken(
+      uid,
+      pushToken
+    );
+    return ResponseHandler.sendSuccess(
+      res,
+      updatedCustomer,
+      200,
+      "Updated push token successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports = {
+  createCustomer,
+  getCustomers,
+  updateCustomer,
+  updatePushToken,
+};
