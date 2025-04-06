@@ -71,23 +71,14 @@ Hãy trả về chuỗi JSON phù hợp, không nói thêm gì khác.`;
 
     let { storeName, date, invoiceNumber, items, total, type, category } =
       receiptData;
-
-    // Giá trị mặc định cho invoiceNumber và storeName
     storeName = storeName && storeName.trim() !== "" ? storeName : "N/A";
     invoiceNumber =
       invoiceNumber && invoiceNumber.trim() !== "" ? invoiceNumber : "N/A";
-
-    // Chuẩn hóa storeName (loại bỏ tiền tố không mong muốn)
     storeName = storeName.replace(/^(dịch vụ|cửa hàng)\s+/i, "").trim();
-
-    // Kiểm tra tính hợp lệ của hóa đơn (phải có items và total)
     if (!items || !Array.isArray(items) || items.length === 0 || !total) {
       throw new ErrorHandler("Invalid invoice data.", 400);
     }
-
-    // Nếu ngày không tồn tại, sử dụng ngày hiện tại
     if (!date) date = new Date().toISOString().split("T")[0];
-
     return { storeName, date, invoiceNumber, items, total, type, category };
   };
 }
