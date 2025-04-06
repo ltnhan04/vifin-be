@@ -2,6 +2,7 @@ const { db } = require("../configs/firebase.config");
 const { createCustomerSchema } = require("../validations/customer.schema");
 const ErrorHandler = require("../middlewares/error.handler");
 const { createImageUrl, deleteImageFromStorage } = require("../utils/upload");
+
 class CustomerService {
   static createNewCustomer = async ({
     avatar,
@@ -36,6 +37,7 @@ class CustomerService {
       .set(customerData, { merge: true });
     return { ...customerData, _id: uid };
   };
+
   static getCustomer = async (uid) => {
     const docSnap = await db.collection("customers").doc(uid).get();
     if (!docSnap.exists) {
@@ -43,6 +45,7 @@ class CustomerService {
     }
     return { ...docSnap.data(), _id: uid };
   };
+
   static updateCustomerInfo = async (id, data) => {
     const customerInfo = await this.getCustomer(id);
     if (data.avatar && customerInfo.avatar) {
@@ -58,6 +61,15 @@ class CustomerService {
     await db.collection("customers").doc(id).update(updateCustomer);
     const updatedCustomer = await this.getCustomer(id);
     return { ...updatedCustomer, _id: id };
+  };
+
+  static updatePushToken = async (uid, pushToken) => {
+    const customerRef = db.collection("customers").doc(uid);
+    await customerRef.update({
+      push_token: pushToken,
+      updatedAt: new Date(),
+    });
+    return { ...(await this.getCustomer(uid)), _id: uid };
   };
 }
 
