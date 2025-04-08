@@ -11,6 +11,7 @@ const categoriesRoutes = require("./src/routes/category.routes");
 const budgetRoutes = require("./src/routes/budget.routes");
 const transactionRoutes = require("./src/routes/transaction.routes");
 const billRoutes = require("./src/routes/bill.routes");
+const speechRoutes = require("./src/routes/speech.routes");
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ app.use("/v1/category", categoriesRoutes);
 app.use("/v1/budget", budgetRoutes);
 app.use("/v1/transactions", transactionRoutes);
 app.use("/v1/bill", billRoutes);
+app.use("/v1/speech", speechRoutes);
 
 app.get("/", (_, res) => {
   res.send("Hello World! - UPDATED");
