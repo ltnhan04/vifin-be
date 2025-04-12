@@ -116,17 +116,16 @@ class BudgetService {
     }
     return false;
   };
-  static notifyBudgetOverLimit = async (budget) => {
+  static notifyBudgetOverLimit = async (budget, customer_id) => {
     try {
-      const customer = await CustomerService.getCustomer(budget.customer_id);
+      const customer = await CustomerService.getCustomer(customer_id);
       const category = await CategoryService.getCategory(budget.category_id);
-
       if (customer.push_token) {
-        const title = "Oops! Budget Limit Reached";
-        const body = `You've gone over your budget for "${category.name}". You've spent ${budget.usage} out of ${budget.amount}. Let's get back on track!`;
+        const title = "⚠️ Oops! Budget Limit Reached";
+        const body = `💸 You've gone over your budget for "${category.name}".\nYou've spent 🔥 ${budget.usage} out of 🎯 ${budget.amount}.\nLet's get back on track! 💪`;
 
         await NotificationService.sendPushNotification(
-          [customer.push_token],
+          [customer.push_token.pushToken],
           title,
           body,
           {
@@ -141,7 +140,7 @@ class BudgetService {
       console.error("Error sending budget notification:", error);
     }
   };
-  static handleRepeatBudget = async (budget) => {
+  static handleRepeatBudget = async (budget, customer_id) => {
     const currentDate = new Date();
     const dueDate =
       budget.dueDate && budget.dueDate.toDate
@@ -150,6 +149,9 @@ class BudgetService {
     const usage = await this.getBudgetUsage(budget._id);
     const isCompleted = usage >= budget.amount;
     if (budget.is_repeated && (currentDate >= dueDate || isCompleted)) {
+      if (isCompleted) {
+        await this.notifyBudgetOverLimit(budget, customer_id);
+      }
       const newDueDate = this.autoRenewBudget(
         budget.repeat_type,
         budget.startDate,

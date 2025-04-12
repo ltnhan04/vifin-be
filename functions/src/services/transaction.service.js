@@ -353,7 +353,7 @@ class TransactionService {
         const budget = { _id: budgetRef.id, ...budgetSnap.data() };
         const isCompleted = await BudgetService.checkBudgetCompletion(budget);
         if (isCompleted && budget.is_repeated) {
-          await BudgetService.handleRepeatBudget(budget);
+          await BudgetService.handleRepeatBudget(budget, customer_id);
         }
       }
     }

@@ -16,6 +16,7 @@ const {
 router.get("/", authenticateToken, getBudgets);
 router.get("/filter", authenticateToken, getBudgetByRepeatType);
 router.get("/:id", authenticateToken, getBudget);
+
 router.post("/", authenticateToken, validateCreateBudget, createNewBudget);
 router.put("/:id", authenticateToken, validateUpdateBudget, updateBudget);
 router.delete("/:id", authenticateToken, deletedBudget);
