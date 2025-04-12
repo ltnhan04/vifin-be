@@ -24,7 +24,7 @@ const updateBudget = async (req, res, next) => {
     budget = await BudgetService.getBudgetById(budgetId);
     await BudgetService.checkBudgetCompletion(budget);
     if (budget.is_repeated) {
-      await BudgetService.handleRepeatBudget(budget);
+      await BudgetService.handleRepeatBudget(budget, req.customer.user_id);
     }
     return ResponseHandler.sendSuccess(
       res,

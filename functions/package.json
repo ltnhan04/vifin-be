@@ -16,6 +16,7 @@
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "expo-server-sdk": "^3.14.0",
     "express": "^4.21.2",
     "express-multipart-file-parser": "^0.1.2",
     "firebase": "^11.3.1",

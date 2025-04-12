@@ -9,7 +9,7 @@ const fs = require("fs");
 dotenv.config();
 const serviceAccountPath = path.resolve(
   __dirname,
-  "vifin-app-firebase-adminsdk-z76vc-570916c2d7.json"
+  "vifin-app-firebase-adminsdk-z76vc-4bb289a55d.json"
 );
 if (!fs.existsSync(serviceAccountPath)) {
   throw new Error(
