@@ -24,8 +24,6 @@ const speechToText = async (req, res, next) => {
     const data = req.body;
     const audioUrl = data.audioUrl;
     const audioConfig = data.audioConfig;
-    console.log(audioUrl);
-    console.log(audioConfig);
     const text = await SpeechService.speechToText(audioUrl, audioConfig);
     return ResponseHandler.sendSuccess(
       res,

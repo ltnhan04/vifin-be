@@ -30,6 +30,8 @@ class SpeechService {
     )
       .then((response) => response.json())
       .catch((err) => console.log(err));
+    console.log("speechResults", JSON.stringify(speechResults, null, 2));
+
     if (!speechResults.results || !speechResults.results[0]?.alternatives) {
       throw new ErrorHandler("Speech recognition failed", 500);
     }
