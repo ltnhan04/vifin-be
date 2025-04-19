@@ -20,10 +20,12 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 ### ✨ App Overview
 
 <div align="center">
-  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080868/video-16pro/llcmpau13uzrhcns2lww.mp4" target="_blank">
-    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080868/video-16pro/llcmpau13uzrhcns2lww.jpg" alt="App Overview Demo (2:26)" width="280"/>
+
+  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.mp4" target="_blank">
+    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.jpg" alt="Receipt Processing Demo (4:12)" width="280"/>
     <br/>
-    ▶️ Watch Full Demo (2:26)
+    ▶️ Watch Full Demo (4:12)
+
   </a>
 </div>
 
@@ -34,10 +36,10 @@ ViFin revolutionizes personal finance management with AI-powered features and in
   <img src="docs/images/invoice-flow-final.png" alt="Invoice Classification Flow" width="800"/>
   
   <h4>Live Demo</h4>
-  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.mp4" target="_blank">
-    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.jpg" alt="Receipt Processing Demo (4:12)" width="280"/>
+  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080868/video-16pro/llcmpau13uzrhcns2lww.mp4" target="_blank">
+    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080868/video-16pro/llcmpau13uzrhcns2lww.jpg" alt="App Overview Demo (2:26)" width="280"/>
     <br/>
-    ▶️ Watch Full Demo (4:12)
+    ▶️ Watch Full Demo (2:26)
   </a>
 </div>
 
