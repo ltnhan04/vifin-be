@@ -1,4 +1,5 @@
 # ViFin: Finance Assist ✨
+
 > Your Smart Financial Companion 📱💰
 
 ![Version](https://img.shields.io/badge/version-1.0.1-blue)
@@ -16,16 +17,19 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 ## ⚡ Core Features
 
 ### 📝 Transaction Management
+
 - 💳 **Multi-wallet Support** - Manage multiple wallets
 - 🔍 **Smart Filtering** - Filter transactions by type (income/expense) and wallet
 - 📋 **Recent Activities** - Track your latest financial movements at a glance
 
 ### 🧾 Smart Receipt Processing
+
 - 🔍 **AI-Powered OCR** - Extract data from receipts automatically
 - 🤖 **Smart Categorization** - Auto-classify expenses using AI
 - 🎙️ **Voice Input** - Add transactions through voice commands
 
 ### 💰 Budget Control
+
 - 📅 **Budget Planning** - Set budgets by category
 - 🔄 **Auto Renewal** - Automatic budget reset based on repeat type (custom/weekly/monthly/yearly)
 - ⚡ **Spending Limits** - Track and manage spending thresholds
@@ -33,14 +37,15 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 - 🔔 **Smart Alerts** - Automated notifications for budget limits and renewals
 
 ### 📊 Financial Analytics
+
 - 📈 **Time-based Analysis** - Track transactions by weekly/monthly/yearly periods
 - 💹 **Income vs Expense** - Compare financial flows across different timeframes
 - 👛 **Wallet Performance** - Monitor transactions by wallet and transaction type
 
-
 ## 🛠️ Technology Stack
 
 ### 📱 Mobile App
+
 <div align="center">
   <img src="https://skillicons.dev/icons?i=react,ts,redux,tailwind,firebase,babel,jest,androidstudio,githubactions,linux,ubuntu" alt="Frontend Core" />
 </div>
@@ -61,6 +66,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 ```
 
 ### ⚙️ Backend Services
+
 <div align="center">
   <img src="https://skillicons.dev/icons?i=nodejs,express,firebase,jest,gcp,postman,linux,ubuntu" alt="Backend Core" />
 </div>
@@ -81,17 +87,20 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 ## 🚀 Deployment Architecture
 
 ### 📲 Mobile Pipeline
+
 - **Build:** EAS (Expo Application Services)
 - **CI/CD:** GitHub Actions
 - **Distribution:** Google Play Store
 - **Environments:** Development → Staging → Production
 
 #### EAS CI/CD Pipeline
+
 <div align="center">
   <img src="docs/images/eas-pipeline-updated.png" alt="EAS CI/CD Pipeline" width="800"/>
 </div>
 
 ### 🔧 Backend Pipeline
+
 - **Platform:** Firebase Cloud Functions
 - **Scaling:** Auto-scaling with Firebase
 - **Monitoring:** Firebase Console Analytics
@@ -99,6 +108,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 ## 🎬 Experience The Future of Finance
 
 ### ✨ App Overview
+
 <div align="center">
   <video width="280" height="600" controls>
     <source src="docs/demo/app_overview.webm" type="video/webm">
@@ -106,6 +116,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 </div>
 
 ### 🤖 Smart Receipt Processing
+
 <div align="center">
   <h4>System Architecture</h4>
   <img src="docs/images/invoice-flow-final.png" alt="Invoice Classification Flow" width="800"/>
@@ -117,6 +128,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 </div>
 
 ### 🎙️ Voice Input & Notifications
+
 <div align="center">
   <video width="280" height="600" controls>
     <source src="docs/demo/voice&alert.mp4" type="video/mp4">
@@ -125,14 +137,14 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 
 ---
 
-## 📱 Download APK
-```bash
-# Android APK (version 1.0.1)
-docs/build/application-ab9f3c79-a7e4-44b4-a467-5818497d4731.apk
-```
+## 📦 Download APK
+
+You can download the latest demo build of the app here:
+
+👉 [Download ViFin Demo APK](https://github.com/ltnhan04/vifin-be/releases/latest)
+
+> Note: This is a testing version for demonstration purposes only.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-
