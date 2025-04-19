@@ -55,25 +55,40 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 
 ## ⚡ Core Features
 
-### 📝 Transaction Management
+### 🧾 Smart Receipt Processing
+- 🔍 **AI-Powered OCR** - Extract data from receipts automatically
+- 🤖 **Smart Categorization** - Auto-classify expenses using AI
+- 🎙️ **Voice Input** - Add transactions through voice commands
+- 📸 **Real-time Processing** - Instant receipt scanning and analysis
 
-- 💳 **Multi-wallet Support** - Manage multiple wallets
-- 🔍 **Smart Filtering** - Filter transactions by type (income/expense) and wallet
+### 📱 Smart Notifications
+- 🔔 **Budget Alerts** - Get notified when approaching budget limits
+- 📅 **Renewal Reminders** - Auto notifications for recurring budgets
+- 📊 **Progress Updates** - Regular updates on financial goals
+
+### 📝 Transaction Management
+- 💳 **Multi-wallet Support** - Manage multiple wallets 
+- 🔍 **Smart Filtering** - Filter transactions by type, wallet, date, and category
 - 📋 **Recent Activities** - Track your latest financial movements at a glance
 
 ### 💰 Budget Control
-
 - 📅 **Budget Planning** - Set budgets by category
-- 🔄 **Auto Renewal** - Automatic budget reset based on repeat type (custom/weekly/monthly/yearly)
+- 🔄 **Auto Renewal** - Automatic budget reset (custom/weekly/monthly/yearly)
 - ⚡ **Spending Limits** - Track and manage spending thresholds
 - 📊 **Target Progress** - Visual tracking of budget utilization
-- 🔔 **Smart Alerts** - Automated notifications for budget limits and renewals
+- 🎯 **Custom Goals** - Set and track personal financial goals
 
 ### 📊 Financial Analytics
-
 - 📈 **Time-based Analysis** - Track transactions by weekly/monthly/yearly periods
 - 💹 **Income vs Expense** - Compare financial flows across different timeframes
 - 👛 **Wallet Performance** - Monitor transactions by wallet and transaction type
+- 📋 **Custom Reports** - Generate detailed financial reports
+
+### 🔐 Security & Privacy
+- 🔒 **Secure Authentication** - Email and Google sign-in options
+- 🛡️ **Data Encryption** - End-to-end encryption for financial data
+- 👤 **Profile Management** - Customize and secure your profile
+- 📱 **Push Notifications** - Secure and customizable alerts
 
 ## 🛠️ Technology Stack
 
