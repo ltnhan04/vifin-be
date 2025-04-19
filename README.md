@@ -111,7 +111,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 
 <div align="center">
   <video width="280" height="600" controls>
-    <source src="docs/demo/app_overview.webm" type="video/webm">
+    <source src="docs/demo/app_overview.mp4" type="video/mp4">
   </video>
 </div>
 
@@ -123,7 +123,7 @@ ViFin revolutionizes personal finance management with AI-powered features and in
   
   <h4>Live Demo</h4>
   <video width="280" height="600" controls>
-    <source src="docs/demo/ocr_flow.webm" type="video/webm">
+    <source src="docs/demo/ocr_flow.mp4" type="video/mp4">
   </video>
 </div>
 
