@@ -1,18 +1,55 @@
 # ViFin: Finance Assist ✨
 
-> Your Smart Financial Companion 📱💰
+<div align="center">
+  <img src="docs/images/logo_vifin.png" alt="ViFin Logo" width="200"/>
+  
+  > Your Smart Financial Companion 📱💰
 
 ![Version](https://img.shields.io/badge/version-1.0.1-blue)
 ![Platform](https://img.shields.io/badge/platform-Android-green)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-orange)
 
-## 🎯 Overview
-
-<div align="center">
-  <img src="docs/images/logo_vifin.png" alt="ViFin Logo" width="200"/>
 </div>
 
+## 📱 Quick Overview
+
 ViFin revolutionizes personal finance management with AI-powered features and intuitive design. Transform your receipts into insights, track expenses effortlessly, and make smarter financial decisions.
+
+## 🎬 Key Features & Demo
+
+### ✨ App Overview
+
+<div align="center">
+  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080868/video-16pro/llcmpau13uzrhcns2lww.mp4" target="_blank">
+    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080868/video-16pro/llcmpau13uzrhcns2lww.jpg" alt="App Overview Demo (2:26)" width="280"/>
+    <br/>
+    ▶️ Watch Full Demo (2:26)
+  </a>
+</div>
+
+### 🧾 Smart Receipt Processing
+
+<div align="center">
+  <h4>System Architecture</h4>
+  <img src="docs/images/invoice-flow-final.png" alt="Invoice Classification Flow" width="800"/>
+  
+  <h4>Live Demo</h4>
+  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.mp4" target="_blank">
+    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080863/video-16pro/mg5vevgzjxneacye6mkz.jpg" alt="Receipt Processing Demo (4:12)" width="280"/>
+    <br/>
+    ▶️ Watch Full Demo (4:12)
+  </a>
+</div>
+
+### 🎙️ Voice Input & Notifications
+
+<div align="center">
+  <a href="https://res.cloudinary.com/durjxrcdm/video/upload/e_accelerate:100/v1745080869/video-16pro/bzwve15fh16ihrhchut3.mp4" target="_blank">
+    <img src="https://res.cloudinary.com/durjxrcdm/video/upload/w_280,so_0,eo_1/v1745080869/video-16pro/bzwve15fh16ihrhchut3.jpg" alt="Voice Input Demo (1:14)" width="280"/>
+    <br/>
+    ▶️ Watch Full Demo (1:14)
+  </a>
+</div>
 
 ## ⚡ Core Features
 
@@ -21,12 +58,6 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 - 💳 **Multi-wallet Support** - Manage multiple wallets
 - 🔍 **Smart Filtering** - Filter transactions by type (income/expense) and wallet
 - 📋 **Recent Activities** - Track your latest financial movements at a glance
-
-### 🧾 Smart Receipt Processing
-
-- 🔍 **AI-Powered OCR** - Extract data from receipts automatically
-- 🤖 **Smart Categorization** - Auto-classify expenses using AI
-- 🎙️ **Voice Input** - Add transactions through voice commands
 
 ### 💰 Budget Control
 
@@ -104,38 +135,6 @@ ViFin revolutionizes personal finance management with AI-powered features and in
 - **Platform:** Firebase Cloud Functions
 - **Scaling:** Auto-scaling with Firebase
 - **Monitoring:** Firebase Console Analytics
-
-## 🎬 Experience The Future of Finance
-
-### ✨ App Overview
-
-<div align="center">
-  <video width="280" height="600" controls>
-    <source src="docs/demo/app_overview.mp4" type="video/mp4">
-  </video>
-</div>
-
-### 🤖 Smart Receipt Processing
-
-<div align="center">
-  <h4>System Architecture</h4>
-  <img src="docs/images/invoice-flow-final.png" alt="Invoice Classification Flow" width="800"/>
-  
-  <h4>Live Demo</h4>
-  <video width="280" height="600" controls>
-    <source src="docs/demo/ocr_flow.mp4" type="video/mp4">
-  </video>
-</div>
-
-### 🎙️ Voice Input & Notifications
-
-<div align="center">
-  <video width="280" height="600" controls>
-    <source src="docs/demo/voice&alert.mp4" type="video/mp4">
-  </video>
-</div>
-
----
 
 ## 📦 Download APK
 
